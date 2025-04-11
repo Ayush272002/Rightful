@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
 import { getContract } from './rightful';
 
-// Example: using MetaMask signer in browser
 export async function storeDocumentViaMetamask(data: {
   title: string;
   description: string;
@@ -33,4 +32,5 @@ export async function storeDocumentViaMetamask(data: {
 
   await tx.wait();
   console.log('Document stored:', tx.hash);
+  return tx.hash;
 }

@@ -1,8 +1,10 @@
-import { ethers } from 'ethers';
-import { getContract } from './rightful';
+import { ethers } from "ethers";
+import { getContract } from "./rightful";
+import dotenv from "dotenv";
 
-// Example: using MetaMask signer in browser
-export async function storeDocumentViaMetamask(data: {
+dotenv.config();
+
+export async function storeDocument(data: {
   title: string;
   description: string;
   resourceLocation: string;
@@ -12,25 +14,39 @@ export async function storeDocumentViaMetamask(data: {
   audienceEngagement: number;
   vector: string;
 }) {
-  if (!(window as any).ethereum) throw new Error('No wallet detected');
+  const PRIVATE_KEY = process.env.PRIVATE_KEY;
+  const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 
-  await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+  if (!PRIVATE_KEY) throw new Error("Private key is missing!");
+  if (!CONTRACT_ADDRESS) throw new Error("Contract address is missing!");
 
-  const provider = new ethers.BrowserProvider((window as any).ethereum);
-  const signer = await provider.getSigner();
-  const contract = getContract(signer);
+  const tokenCount = Math.round(data.tokenCount);
+  const lexicalDensity = Math.round(data.lexicalDensity * 1000000);
+  const audienceEngagement = Math.round(data.audienceEngagement * 1000000);
+
+  const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID?.trim();
+  const RPC_URL = INFURA_PROJECT_ID
+    ? `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`
+    : "https://sepolia.drpc.org";
+
+  const provider = new ethers.JsonRpcProvider(RPC_URL);
+
+  const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
+  const contract = getContract(wallet);
 
   const tx = await contract.storeDocument(
     data.title,
     data.description,
     data.resourceLocation,
     data.documentHash,
-    data.tokenCount,
-    data.lexicalDensity,
-    data.audienceEngagement,
+    tokenCount,
+    lexicalDensity,
+    audienceEngagement,
     data.vector
   );
 
   await tx.wait();
-  console.log('Document stored:', tx.hash);
+  console.log("Document stored:", tx.hash);
+  return tx.hash;
 }
