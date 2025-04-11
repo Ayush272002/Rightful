@@ -1,7 +1,7 @@
 "use client";
 /**
  * @fileoverview Home page component for Rightful - an intellectual property protection platform
- * Implements the landing page with hero section and feature overview
+ * Implements the landing page with hero section and feature overview for new users.
  *
  * @todo Add proper error handling for file uploads
  * @todo Implement drag-and-drop functionality
@@ -9,49 +9,15 @@
  */
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Upload, FileText, BarChart3 } from 'lucide-react';
+import { ArrowRight, Upload, FileText, BarChart3, Link2 } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
 
 // Constants for reusable values
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];
 
 export default function Home() {
-  const [alerts, setAlerts] = useState<{ id: number; title: string; description: string; severity: string }[]>([]);
   const [showChat, setShowChat] = useState(false);
-
-  useEffect(() => {
-    // Hardcoded JSON response simulating backend data
-    const mockAlerts = [
-      {
-        id: 1,
-        title: 'Potential Infringement Detected',
-        description: 'Your document matches 85% with a registered patent.',
-        severity: 'high',
-      },
-      {
-        id: 2,
-        title: 'Similarity Found',
-        description: 'A 60% similarity was found with an academic paper.',
-        severity: 'medium',
-      },
-    ];
-
-    // If there is no response or an empty response, show a green alert message
-    if (!mockAlerts || mockAlerts.length === 0) {
-      setAlerts([
-        {
-          id: 0,
-          title: 'All Clear!',
-          description: 'Good News, no similarities or infringements found',
-          severity: 'clear',
-        },
-      ]);
-    } else {
-      setAlerts(mockAlerts);
-    }
-  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -88,9 +54,7 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-4">
                     <Upload className="w-6 h-6 text-accent" />
                   </div>
-                  <h3 className="text-lg font-medium mb-2">
-                    Upload Your Document
-                  </h3>
+                  <h3 className="text-lg font-medium mb-2">Upload Your Document</h3>
                   <p className="text-sm text-secondary mb-6 max-w-xs mx-auto">
                     Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')})
                     or click to browse
@@ -101,71 +65,29 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Intellectual Property Infringement Alerts */}
-          <div className="mt-12">
-            <h2 className="heading-medium mb-4 
-              {`${
-                alerts.some(alert => alert.severity === 'high' || alert.severity === 'medium')
-                  ? 'text-black-600'
-                  : 'text-green-600'
-              }`}"
-            >
-              Intellectual Property Infringement Alerts
-            </h2>
-            <div className="space-y-4">
-              {alerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className={`p-4 rounded-lg border ${
-                    alert.severity === 'high'
-                      ? 'border-red-600 bg-red-50'
-                      : alert.severity === 'medium'
-                      ? 'border-yellow-500 bg-yellow-50'
-                      : 'border-green-600 bg-green-50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <AlertCircle
-                      className={`w-6 h-6 ${
-                        alert.severity === 'high'
-                          ? 'text-red-600'
-                          : alert.severity === 'medium'
-                          ? 'text-yellow-500'
-                          : 'text-green-600'
-                      }`}
-                    />
-                    <h3
-                      className={`text-lg font-medium ${
-                        alert.severity === 'high'
-                          ? 'text-red-600'
-                          : alert.severity === 'medium'
-                          ? 'text-yellow-500'
-                          : 'text-green-600'
-                      }`}
-                    >
-                      {alert.title}
-                    </h3>
-                  </div>
-                  <p className="text-sm text-secondary mt-2">{alert.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Our Services Section */}
           <section className="py-12">
             <div className="container mx-auto">
               <h2 className="heading-medium text-center mb-6">Our Services</h2>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg">
-                  Add a copywrite for my document
-                </Button>
-                <Button size="lg" variant="outline">
-                  Link to Google Docs
-                </Button>
-                <Button size="lg" variant="outline">
-                  Check my work for plagerism
-                </Button>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="card flex flex-col items-center justify-center p-6">
+                  <FileText className="w-8 h-8 text-accent mb-4" />
+                  <Button size="lg" variant="outline">
+                    Register my Intellectual Content
+                  </Button>
+                </div>
+                <div className="card flex flex-col items-center justify-center p-6">
+                  <Link2 className="w-8 h-8 text-accent mb-4" />
+                  <Button size="lg" variant="outline">
+                    Link to Google Docs
+                  </Button>
+                </div>
+                <div className="card flex flex-col items-center justify-center p-6">
+                  <BarChart3 className="w-8 h-8 text-accent mb-4" />
+                  <Button size="lg" variant="outline">
+                    Check my work for plagerism
+                  </Button>
+                </div>
               </div>
             </div>
           </section>
@@ -178,8 +100,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="heading-medium mb-4">How Rightful Works</h2>
             <p className="text-secondary max-w-2xl mx-auto">
-              Our platform uses advanced AI and blockchain technology to detect
-              similarities between documents and protect intellectual property.
+              Our platform uses advanced AI and blockchain technology to detect similarities between documents and protect intellectual property.
             </p>
           </div>
 
@@ -192,8 +113,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">1. Upload Document</h3>
               <p className="text-secondary text-sm">
-                Upload your document to the blockchain and provide basic
-                information
+                Upload your document to the blockchain and provide basic information
               </p>
             </div>
 
@@ -204,8 +124,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">2. AI Analysis</h3>
               <p className="text-secondary text-sm">
-                Our AI extracts text and calculates vector representation for
-                similarity comparison.
+                Our AI extracts text and calculates vector representation for similarity comparison.
               </p>
             </div>
 
@@ -216,8 +135,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">3. View Results</h3>
               <p className="text-secondary text-sm">
-                See similar documents with percentage match and links to the
-                original sources.
+                See similar documents with percentage match and links to the original sources.
               </p>
             </div>
           </div>
