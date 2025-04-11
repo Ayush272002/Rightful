@@ -7,14 +7,15 @@
  * @todo Consider adding dropdown menus for Documentation
  */
 
-import { Button } from "@/components/ui/button";
-import { Shield, Menu } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Shield, Menu } from 'lucide-react';
+import WalletConnect from '@/components/WalletConnect';
 
 // Constants for navigation items
 const NAV_ITEMS = [
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Documentation", href: "#docs" },
+  { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Pricing', href: '#pricing' },
+  { label: 'Documentation', href: '#docs' },
 ] as const;
 
 export function Header() {
@@ -40,10 +41,7 @@ export function Header() {
           ))}
 
           {/* Authentication buttons */}
-          <Button size="sm" variant="outline">
-            Sign In
-          </Button>
-          <Button size="sm">Get Started</Button>
+          <WalletConnect />
         </nav>
 
         {/* Mobile menu button  */}

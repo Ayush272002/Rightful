@@ -7,18 +7,12 @@
  * @todo Add loading states to buttons
  */
 
-import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  Upload,
-  FileText,
-  BarChart3,
-  AlertCircle,
-} from "lucide-react";
-import { Header, Footer } from "@/components/custom";
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Upload, FileText, BarChart3 } from 'lucide-react';
+import { Header, Footer } from '@/components/custom';
 
 // Constants for reusable values
-const SUPPORTED_FILE_TYPES = ["PDF", "TXT"];
+const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];
 
 export default function Home() {
   return (
@@ -61,7 +55,7 @@ export default function Home() {
                     Upload Your Document
                   </h3>
                   <p className="text-sm text-secondary mb-6 max-w-xs mx-auto">
-                    Drag and drop your file ({SUPPORTED_FILE_TYPES.join(", ")})
+                    Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')})
                     or click to browse
                   </p>
                   <Button size="sm">Select File</Button>
