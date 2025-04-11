@@ -1,214 +1,214 @@
 [
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "documentHash",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "vector",
-				"type": "string"
-			}
-		],
-		"name": "DocumentCreated",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "documentMap",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "title",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "description",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "resourceLocation",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "documentHash",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenCount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "lexicalDensity",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "audienceEngagement",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "submitterAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "submissionTimestamp",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "vector",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_documentHash",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_index",
-				"type": "uint256"
-			}
-		],
-		"name": "getDocument",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "string",
-						"name": "title",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "description",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "resourceLocation",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "documentHash",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "tokenCount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "lexicalDensity",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "audienceEngagement",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "submitterAddress",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "submissionTimestamp",
-						"type": "uint256"
-					},
-					{
-						"internalType": "string",
-						"name": "vector",
-						"type": "string"
-					}
-				],
-				"internalType": "struct Rightful.Document",
-				"name": "document",
-				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_title",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_description",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_resourceLocation",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_documentHash",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_tokenCount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_lexicalDensity",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_audienceEngagement",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_vector",
-				"type": "string"
-			}
-		],
-		"name": "storeDocument",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "documentHash",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "vector",
+        "type": "string"
+      }
+    ],
+    "name": "DocumentCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "documentMap",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "resourceLocation",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "documentHash",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lexicalDensity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "audienceEngagement",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "submitterAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "submissionTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "vector",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_documentHash",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getDocument",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "resourceLocation",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "documentHash",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lexicalDensity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "audienceEngagement",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "submitterAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "submissionTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "vector",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct Rightful.Document",
+        "name": "document",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_description",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_resourceLocation",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_documentHash",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_tokenCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_lexicalDensity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_audienceEngagement",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_vector",
+        "type": "string"
+      }
+    ],
+    "name": "storeDocument",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
 ]
