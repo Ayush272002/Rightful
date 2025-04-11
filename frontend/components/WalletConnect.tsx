@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi";
-import { motion } from "framer-motion";
+import { useState } from 'react';
+import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
+import { motion } from 'framer-motion';
 import {
   Wallet,
   LogOut,
@@ -10,28 +10,28 @@ import {
   ExternalLink,
   Copy,
   Check,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from './ui/dialog';
 
 export default function WalletConnect() {
   const { address, isConnected } = useAccount();
@@ -47,7 +47,7 @@ export default function WalletConnect() {
 
   // @ts-ignore
   const formatAddress = (address) => {
-    if (!address) return "";
+    if (!address) return '';
     return `${address.substring(0, 6)}...${address.substring(
       address.length - 4
     )}`;
@@ -64,7 +64,7 @@ export default function WalletConnect() {
   const openExplorer = () => {
     if (address) {
       // explorer URL for Sepolia
-      window.open(`https://sepolia.etherscan.io/address/${address}`, "_blank");
+      window.open(`https://sepolia.etherscan.io/address/${address}`, '_blank');
     }
   };
 
@@ -77,7 +77,7 @@ export default function WalletConnect() {
   // @ts-ignore
   const getWalletIcon = (name) => {
     switch (name.toLowerCase()) {
-      case "metamask":
+      case 'metamask':
         return (
           <svg
             width="24"
@@ -152,7 +152,7 @@ export default function WalletConnect() {
             />
           </svg>
         );
-      case "coinbase wallet":
+      case 'coinbase wallet':
         return (
           <svg
             width="24"
@@ -168,7 +168,7 @@ export default function WalletConnect() {
             />
           </svg>
         );
-      case "walletconnect":
+      case 'walletconnect':
         return (
           <svg
             width="24"
@@ -203,7 +203,7 @@ export default function WalletConnect() {
                 <span className="font-mono text-emerald-400">
                   {balance?.formatted
                     ? Number.parseFloat(balance.formatted).toFixed(4)
-                    : "0.0000"}{" "}
+                    : '0.0000'}{' '}
                   {balance?.symbol}
                 </span>
                 <ChevronDown className="ml-2 h-4 w-4" />
@@ -220,7 +220,7 @@ export default function WalletConnect() {
               <p className="text-lg font-mono text-emerald-400">
                 {balance?.formatted
                   ? Number.parseFloat(balance.formatted).toFixed(4)
-                  : "0.0000"}{" "}
+                  : '0.0000'}{' '}
                 {balance?.symbol}
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function WalletConnect() {
                     ) : (
                       <Copy className="mr-2 h-4 w-4" />
                     )}
-                    {copied ? "Copied!" : "Copy Address"}
+                    {copied ? 'Copied!' : 'Copy Address'}
                   </DropdownMenuItem>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -290,9 +290,9 @@ export default function WalletConnect() {
                     key={connector.uid}
                     variant="outline"
                     className={`flex items-center justify-start gap-3 p-4 h-auto border-gray-700 hover:border-purple-500 hover:bg-gray-800/50 text-left ${
-                      connector.name.toLowerCase() === "metamask"
-                        ? "border-amber-600/30 bg-amber-900/10"
-                        : ""
+                      connector.name.toLowerCase() === 'metamask'
+                        ? 'border-amber-600/30 bg-amber-900/10'
+                        : ''
                     }`}
                     onClick={() => handleConnectClick(connector)}
                   >
