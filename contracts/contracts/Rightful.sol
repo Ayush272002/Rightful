@@ -49,6 +49,8 @@ contract Rightful {
         document.submissionTimestamp = block.timestamp;
         document.vector = _vector;
         documentMap[_documentHash].push(document);
+
+        emit DocumentCreated(_documentHash, _vector);
     }
 
     function getDocument(
