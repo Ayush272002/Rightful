@@ -3,12 +3,12 @@
  * Single line layout with brand name, legal links and copyright information
  */
 
-import { Shield } from "lucide-react";
+import { Shield } from 'lucide-react';
 
 const LEGAL_LINKS = [
-  { label: "Privacy Policy", href: "#privacy" },
-  { label: "Terms of Service", href: "#terms" },
-  { label: "Cookie Policy", href: "#cookies" },
+  { label: 'Privacy Policy', href: '#privacy' },
+  { label: 'Terms of Service', href: '#terms' },
+  { label: 'Cookie Policy', href: '#cookies' },
 ] as const;
 
 export function Footer() {
