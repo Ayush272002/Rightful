@@ -75,18 +75,27 @@ export default function Home() {
                   <Button size="lg" variant="outline">
                     Register my Intellectual Content
                   </Button>
+                  <p className="text-sm text-secondary mt-2 text-center">
+                    Securely register and safeguard your original documents.
+                  </p>
                 </div>
                 <div className="card flex flex-col items-center justify-center p-6">
                   <Link2 className="w-8 h-8 text-accent mb-4" />
                   <Button size="lg" variant="outline">
                     Link to Google Docs
                   </Button>
+                  <p className="text-sm text-secondary mt-2 text-center">
+                    Connect your Google Docs for seamless integration.
+                  </p>
                 </div>
                 <div className="card flex flex-col items-center justify-center p-6">
                   <BarChart3 className="w-8 h-8 text-accent mb-4" />
                   <Button size="lg" variant="outline">
                     Check my work for plagerism
                   </Button>
+                  <p className="text-sm text-secondary mt-2 text-center">
+                    Analyze your document for originality and overlap.
+                  </p>
                 </div>
               </div>
             </div>
