@@ -16,13 +16,7 @@ import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 
 // Constants for navigation items (Dashboard link will be conditionally shown)
-const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Documentation', href: '#docs' },
-  { label: 'Contact', href: '#contact' },
-] as const;
+const NAV_ITEMS = [{ label: 'Dashboard', href: '/dashboard' }] as const;
 
 export function Header() {
   const router = useRouter();
