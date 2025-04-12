@@ -19,9 +19,11 @@ import {
   Brain,
   BookOpen,
   Hash,
+  Link,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { redirect } from 'next/navigation';
 
 dotenv.config();
 
@@ -239,6 +241,23 @@ const AgentCard = ({
     </div>
   );
 };
+
+const similarityColourCalculator = (similarity: number) => {
+  let r, g, b = 0;
+  const sim = similarity;
+
+  if (sim < 0.5) {
+    // Green → Orange (0.0 to 0.5)
+    g = 255;
+    r = Math.floor(255 * (sim / 0.5)); // 0 to 255
+  } else {
+    // Orange → Red (0.5 to 1.0)
+    r = 255;
+    g = Math.floor(255 * (1 - (sim - 0.5) / 0.5)); // 255 to 0
+  }
+
+  return `rgb(${Math.floor(r / 1.5)}, ${Math.floor(g / 1.5)}, ${Math.floor(b / 1.5)})`;
+}
 
 interface DocumentProcessorProps {
   onClose: () => void;
@@ -800,34 +819,49 @@ export default function DocumentProcessor({
               ) : similarDocuments.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4">
                   {similarDocuments.map((doc, index) => {
+                    console.log(doc);
+                    console.log(`rgb(${Math.floor(doc.similarity*255)}, 100, 100)`);
+                    if (index == 1) doc.similarity = 0.66;
+                    if (index == 2) doc.similarity = 0.42;
                     const metadata = JSON.parse(doc.metadata);
                     return (
-                      <div key={index} className="bg-muted/30 p-4 rounded-lg">
+                      <div key={index} className="bg-muted/30 p-4 rounded-lg border-2">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{metadata.title}</h4>
+                          <div className="flex gap-2">
+                            <div className="text-white p-1 rounded-sm text-sm" style={{
+                              // backgroundColor: `rgb(${Math.floor(doc.similarity*155)}, ${Math.floor((1-doc.similarity)*155)}, 0)`,
+                              backgroundColor: similarityColourCalculator(doc.similarity),
+                            }}>{Math.round(doc.similarity * 100)}%</div>
+                            <h4 className="font-medium">{metadata.title}</h4>
+                          </div>
                           <span className="text-xs text-secondary">
                             {new Date(
                               metadata.submissionTimestamp
-                            ).toLocaleDateString()}
+                            ).toLocaleString()}
                           </span>
                         </div>
                         <p className="text-sm text-secondary mb-2">
-                          {doc.description}
+                          {metadata.description}
                         </p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center">
-                            <Hash className="w-4 h-4 mr-1 text-accent" />
-                            <span className="text-secondary">Hash:</span>
-                            <code className="ml-1 bg-muted px-2 py-0.5 rounded">
-                              {doc.hash ? doc.hash.slice(0, 8) + '...' : 'N/A'}
-                            </code>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center">
+                              <Hash className="w-4 h-4 mr-1 text-accent" />
+                              <span className="text-secondary">Hash:</span>
+                              <code className="ml-1 bg-muted px-2 py-0.5 rounded">
+                                {doc.hash ? doc.hash.slice(0, 8) + '...' : 'N/A'}
+                              </code>
+                            </div>
+                            <div className="flex items-center">
+                              <Database className="w-4 h-4 mr-1 text-accent" />
+                              <span className="text-secondary">Tokens:</span>
+                              <span className="ml-1 font-medium">
+                                {metadata.tokenCount}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center">
-                            <Database className="w-4 h-4 mr-1 text-accent" />
-                            <span className="text-secondary">Tokens:</span>
-                            <span className="ml-1 font-medium">
-                              {metadata.tokenCount}
-                            </span>
+                          <div>
+                            <Link className="w-4 h-4 mr-1 text-accent hover:cursor-pointer" onClick={() => { redirect(doc.content) }} />
                           </div>
                         </div>
                       </div>
