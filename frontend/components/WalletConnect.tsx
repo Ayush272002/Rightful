@@ -291,7 +291,7 @@ export default function WalletConnect() {
           </motion.div>
 
           <Dialog open={isWalletModalOpen} onOpenChange={setIsWalletModalOpen}>
-            <DialogContent className="bg-[#EAF4FF] border border-[#B5D8FF] text-gray-800 sm:max-w-md shadow-md rounded-2xl">
+            <DialogContent className="bg-white border border-[#B5D8FF] text-gray-800 sm:max-w-md shadow-xl rounded-2xl">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold text-center text-gray-900">
                   Connect Wallet
@@ -300,15 +300,16 @@ export default function WalletConnect() {
                   Choose your preferred wallet to connect to Sepolia Testnet
                 </DialogDescription>
               </DialogHeader>
+
               <div className="grid grid-cols-1 gap-4 py-4">
                 {connectors.map((connector) => (
                   <Button
                     key={connector.uid}
                     variant="outline"
-                    className={`flex items-center justify-start gap-3 p-4 h-auto text-left transition-all duration-200 ${
+                    className={`flex items-center justify-start gap-3 p-4 h-auto text-left rounded-xl transition-all duration-200 ${
                       connector.name.toLowerCase() === 'metamask'
-                        ? 'border-[#E17726] bg-[#FCEEE2] hover:bg-[#FADDBE]'
-                        : 'border-gray-200 hover:border-[#4A8CFF] hover:bg-blue-50'
+                        ? 'border-[#6C8EFC] bg-[#E6F0FF] hover:bg-[#D0E2FF]'
+                        : 'border-[#A5C9FF] hover:border-[#4A8CFF] hover:bg-[#E6F0FF]'
                     }`}
                     onClick={() => handleConnectClick(connector)}
                   >
@@ -316,7 +317,9 @@ export default function WalletConnect() {
                       {getWalletIcon(connector.name)}
                     </div>
                     <div>
-                      <div className="font-medium">{connector.name}</div>
+                      <div className="font-medium text-gray-900">
+                        {connector.name}
+                      </div>
                       <div className="text-xs text-gray-500">
                         Connect using {connector.name}
                       </div>
@@ -324,9 +327,17 @@ export default function WalletConnect() {
                   </Button>
                 ))}
               </div>
-              <div className="text-xs text-gray-500 text-center">
-                By connecting your wallet, you agree to our Terms of Service and
-                Privacy Policy
+
+              <div className="text-xs text-gray-500 text-center px-4">
+                By connecting your wallet, you agree to our{' '}
+                <span className="underline cursor-pointer hover:text-gray-700">
+                  Terms of Service
+                </span>{' '}
+                and{' '}
+                <span className="underline cursor-pointer hover:text-gray-700">
+                  Privacy Policy
+                </span>
+                .
               </div>
             </DialogContent>
           </Dialog>
