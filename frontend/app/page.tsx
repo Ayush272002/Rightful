@@ -13,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Upload, FileText, BarChart3, Link2 } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState, useRef } from 'react';
-import ChatWindow from './components/custom/ChatWindow';
-import ChatIcon from './components/custom/ChatIcon';
+import ChatWindow from '../components/custom/ChatWindow';
+import ChatIcon from '../components/custom/ChatIcon';
 
 // Constants for reusable values
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];
@@ -77,7 +77,7 @@ export default function Home() {
             {/* Left half - Value proposition (2/3 width) */}
             <div className="md:col-span-2">
               <h1 className="heading-large mb-4">
-                Secure Intellectual Property on the Blockchain
+                The AI Protecting your Intellectual Property On-Chain
               </h1>
               <p className="text-secondary text-lg mb-8 max-w-lg">
                 Rightful uses AI agents to detect document similarity and help
@@ -86,7 +86,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="gap-2">
-                  Upload Document <ArrowRight className="w-4 h-4" />
+                <a href='upload'>Upload Document</a>
                 </Button>
                 <Button size="lg" variant="outline" className="gap-2">
                   How It Works <ArrowRight className="w-4 h-4" />
