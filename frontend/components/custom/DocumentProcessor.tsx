@@ -20,6 +20,8 @@ import {
   BookOpen,
   Hash,
   Link,
+  BadgeCheckIcon,
+  BadgeHelpIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -827,7 +829,15 @@ export default function DocumentProcessor({
                             <div className="text-white p-1 rounded-sm text-sm" style={{
                               backgroundColor: similarityColourCalculator(doc.similarity),
                             }}>{Math.round(doc.similarity * 100)}%</div>
-                            <h4 className="font-medium">{metadata.title}</h4>
+                            <h4 className="font-medium">{metadata.title}
+                              {
+                                (process.env.NEXT_PUBLIC_TRUSTED_VERIFIER == metadata.submitterAddress)
+                                ?
+                                <><BadgeCheckIcon className="inline text-green-600 ml-2" /><span className="text-sm ml-1 text-green-600">Trusted Verifier ({metadata.submitterAddress.slice(0, 8) + '...'})</span></>
+                                :
+                                <><BadgeHelpIcon className="inline text-purple-500 ml-2" /><span className="text-sm ml-1 text-purple-500">Untrusted Verifier ({metadata.submitterAddress.slice(0, 8) + '...'})</span></>
+                              }
+                            </h4>
                           </div>
                           <span className="text-xs text-secondary">
                             {new Date(
