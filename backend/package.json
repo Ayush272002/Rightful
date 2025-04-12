@@ -19,6 +19,7 @@
     "cosine-similarity": "^1.0.1",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.5.0",
+    "ethers": "^6.13.5",
     "express": "^5.1.0",
     "langchain": "^0.3.21",
     "multer": "^1.4.5-lts.2",

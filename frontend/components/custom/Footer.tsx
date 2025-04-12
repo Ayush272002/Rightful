@@ -1,9 +1,12 @@
+'use client';
+
 /**
  * @fileoverview Simplified Footer component for Rightful platform
  * Single line layout with brand name, legal links and copyright information
  */
 
 import { Shield } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const LEGAL_LINKS = [
   { label: 'Privacy Policy', href: '#privacy' },
@@ -12,6 +15,7 @@ const LEGAL_LINKS = [
 ] as const;
 
 export function Footer() {
+  const router = useRouter();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -19,7 +23,12 @@ export function Footer() {
       <div className="container">
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Brand */}
-          <div className="flex items-center space-x-2">
+          <div
+            className="flex items-center space-x-2 hover:cursor-pointer"
+            onClick={() => {
+              router.push('/');
+            }}
+          >
             <Shield className="w-4 h-4 text-primary/80" />
             <span className="text-sm font-medium">Rightful</span>
           </div>

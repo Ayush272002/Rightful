@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
 import { motion } from 'framer-motion';
 import {
@@ -44,6 +44,22 @@ export default function WalletConnect() {
     address,
     chainId: 11155111,
   });
+
+  const balanceRes = useBalance({
+    address,
+    chainId: 11155111,
+  });
+
+  // useEffect(() => {
+  //   console.log(JSON.stringify(balanceRes));
+  // }, [balanceRes]);
+
+  // useEffect(() => {
+  //   if (address) {
+  //     console.log('Address:', address);
+  //     console.log('Balance:', balance);
+  //   }
+  // }, [address, balance]);
 
   // @ts-ignore
   const formatAddress = (address) => {
