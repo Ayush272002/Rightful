@@ -13,7 +13,7 @@ type DocumentData = {
   vector: string
 } 
 
-export async function getDocument(documentHash: number, index: number): Promise<DocumentData> {
+export async function getDocument(documentHash: string, index: number): Promise<DocumentData> {
   const contract = getContract();
   const doc = await contract.getDocument(documentHash, index);
   return {
@@ -25,7 +25,7 @@ export async function getDocument(documentHash: number, index: number): Promise<
     lexicalDensity: parseInt(doc.lexicalDensity) / 1000000,
     audienceEngagement: parseInt(doc.audienceEngagement) / 1000000,
     submitterAddress: doc.submitterAddress,
-    submissionTimestamp: new Date(doc.submissionTimestamp),
+    submissionTimestamp: new Date(parseInt(doc.submissionTimestamp) * 1000),
     vector: doc.vector
   };
 }
