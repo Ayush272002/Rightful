@@ -8,7 +8,7 @@ export async function storeDocument(data: {
   title: string;
   description: string;
   resourceLocation: string;
-  documentHash: number;
+  documentHash: string;
   tokenCount: number;
   lexicalDensity: number;
   audienceEngagement: number;
@@ -47,6 +47,11 @@ export async function storeDocument(data: {
   );
 
   await tx.wait();
-  console.log("Document stored:", tx.hash);
+  console.log(
+    "Document stored - Tx Hash ",
+    tx.hash,
+    " - Doc Hash ",
+    data.documentHash
+  );
   return tx.hash;
 }
