@@ -33,7 +33,7 @@ export async function getDocument(
   };
 }
 
-// returns all documents with the same hash
+// returns all documents with the same hash, including full metadata
 export async function getDocumentsByHash(
   documentHash: string
 ): Promise<DocumentData[]> {

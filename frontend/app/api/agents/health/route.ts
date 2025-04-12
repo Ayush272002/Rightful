@@ -9,7 +9,8 @@ import { NextResponse } from 'next/server';
 // TOOD: Maybe make more comprehensive health check
 
 export async function GET() {
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
+  const backendUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   try {
     console.log(
