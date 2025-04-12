@@ -1,25 +1,26 @@
-"use client";
+'use client';
 /**
  * @fileoverview Dashboard page for Rightful where existing users can view alerts and manage their documents.
  * The dashboard is only accessible if a wallet is connected.
  */
 
-import { Button } from '@/components/ui/button';
-import { Upload, FileText, BarChart3, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 export default function Dashboard() {
   const { isConnected } = useAccount();
-  const [alerts, setAlerts] = useState<{
-    upload: string;
-    title: string;
-    description: string;
-    similarity: number;
-    hash: string;
-    index: number;
-  }[]>([]);
+  const [alerts, setAlerts] = useState<
+    {
+      upload: string;
+      title: string;
+      description: string;
+      similarity: number;
+      hash: string;
+      index: number;
+    }[]
+  >([]);
 
   useEffect(() => {
     // Hardcoded JSON response simulating backend data.
@@ -75,7 +76,8 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
-              <h2 className="heading-medium mb-4 
+              <h2
+                className="heading-medium mb-4 
                 {`${
                   alerts.some((alert) => alert.similarity >= 50)
                     ? 'text-black-600'
@@ -92,10 +94,10 @@ export default function Dashboard() {
                       alert.similarity >= 90
                         ? 'border-red-600 bg-red-50'
                         : alert.similarity >= 70
-                        ? 'border-yellow-500 bg-yellow-50'
-                        : alert.similarity >= 50
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-green-600 bg-green-50'
+                          ? 'border-yellow-500 bg-yellow-50'
+                          : alert.similarity >= 50
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-green-600 bg-green-50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -104,10 +106,10 @@ export default function Dashboard() {
                           alert.similarity >= 90
                             ? 'text-red-600'
                             : alert.similarity >= 70
-                            ? 'text-yellow-500'
-                            : alert.similarity >= 50
-                            ? 'text-blue-500'
-                            : 'text-green-600'
+                              ? 'text-yellow-500'
+                              : alert.similarity >= 50
+                                ? 'text-blue-500'
+                                : 'text-green-600'
                         }`}
                       />
                       <h3
@@ -115,10 +117,10 @@ export default function Dashboard() {
                           alert.similarity >= 90
                             ? 'text-red-600'
                             : alert.similarity >= 70
-                            ? 'text-yellow-500'
-                            : alert.similarity >= 50
-                            ? 'text-blue-500'
-                            : 'text-green-600'
+                              ? 'text-yellow-500'
+                              : alert.similarity >= 50
+                                ? 'text-blue-500'
+                                : 'text-green-600'
                         }`}
                       >
                         {alert.upload} may be being infringed by {alert.title}
@@ -132,10 +134,10 @@ export default function Dashboard() {
                         alert.similarity >= 90
                           ? 'text-red-600'
                           : alert.similarity >= 70
-                          ? 'text-yellow-500'
-                          : alert.similarity >= 50
-                          ? 'text-blue-500'
-                          : 'text-green-600'
+                            ? 'text-yellow-500'
+                            : alert.similarity >= 50
+                              ? 'text-blue-500'
+                              : 'text-green-600'
                       }`}
                     >
                       <h2>{alert.similarity}%</h2>

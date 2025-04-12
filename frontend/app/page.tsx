@@ -1,4 +1,4 @@
-"use client";
+'use client';
 /**
  * @fileoverview Home page component for Rightful - an intellectual property protection platform.
  * Implements a hero section with a half-and-half layout: left has the title/description and right shows a bobbing AI bot.
@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Upload, FileText, BarChart3, Link2 } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState, useRef } from 'react';
+import ChatWindow from './components/custom/ChatWindow';
+import ChatIcon from './components/custom/ChatIcon';
 
 // Constants for reusable values
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];
@@ -56,6 +58,13 @@ export default function Home() {
     zIndex: 50,
     animationPlayState: scrollProgress > 0.5 ? 'paused' : 'running',
   };
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Use useEffect to handle client-side rendering
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -71,8 +80,9 @@ export default function Home() {
                 Secure Intellectual Property on the Blockchain
               </h1>
               <p className="text-secondary text-lg mb-8 max-w-lg">
-                Rightful uses AI agents to detect document similarity and help you protect your
-                intellectual property through blockchain technology.
+                Rightful uses AI agents to detect document similarity and help
+                you protect your intellectual property through blockchain
+                technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="gap-2">
@@ -105,7 +115,7 @@ export default function Home() {
         alt="AI Chat Bot"
         className="cursor-pointer animate-bob"
         style={botStyle}
-        onClick={() => setShowChat(!showChat)}
+        onClick={() => setIsChatOpen(!isChatOpen)}
       />
 
       {/* Our Services Section */}
@@ -150,7 +160,8 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="heading-medium mb-4">How Rightful Works</h2>
             <p className="text-secondary max-w-2xl mx-auto">
-              Our platform uses advanced AI and blockchain technology to detect similarities between documents and protect intellectual property.
+              Our platform uses advanced AI and blockchain technology to detect
+              similarities between documents and protect intellectual property.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -172,7 +183,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">2. AI Analysis</h3>
               <p className="text-secondary text-sm">
-                Our AI extracts text and calculates vector representation for similarity comparison.
+                Our AI extracts text and calculates vector representation for
+                similarity comparison.
               </p>
             </div>
 
@@ -183,7 +195,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">3. View Results</h3>
               <p className="text-secondary text-sm">
-                See similar documents with percentage match and links to the original sources.
+                See similar documents with percentage match and links to the
+                original sources.
               </p>
             </div>
           </div>
@@ -192,11 +205,10 @@ export default function Home() {
 
       <Footer />
 
-      {/* Optional Chat Window */}
-      {showChat && (
-        <div className="fixed bottom-20 right-4 z-50 w-64 h-80 bg-white border border-gray-300 shadow-lg rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-2">Chat</h3>
-          {/* Chat window placeholder content */}
+      {/* Chat window - only render when open and on client-side */}
+      {isMounted && isChatOpen && (
+        <div className="fixed bottom-8 right-8 z-50 pointer-events-auto">
+          <ChatWindow onClose={() => setIsChatOpen(false)} />
         </div>
       )}
     </div>

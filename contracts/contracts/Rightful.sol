@@ -8,7 +8,7 @@ contract Rightful {
         string title;
         string description;
         string resourceLocation; // link to content / location
-        uint256 documentHash; // file hash
+        string documentHash; // file hash
         
         uint256 tokenCount; // token count
         uint256 lexicalDensity; // number of unique tokens
@@ -21,17 +21,18 @@ contract Rightful {
     }
 
     event DocumentCreated (
-        uint256 documentHash,
+        string documentHash,
         string vector
     );
 
-    mapping(uint256 => Document[]) public documentMap;
+    mapping(string => Document[]) public documentMap;
+    string[] public documentHashes;
 
     function storeDocument(
         string memory _title,
         string memory _description,
         string memory _resourceLocation,
-        uint256 _documentHash,
+        string memory _documentHash,
         uint256 _tokenCount,
         uint256 _lexicalDensity,
         uint256 _audienceEngagement,
@@ -49,12 +50,13 @@ contract Rightful {
         document.submissionTimestamp = block.timestamp;
         document.vector = _vector;
         documentMap[_documentHash].push(document);
+        documentHashes.push(_documentHash);
 
         emit DocumentCreated(_documentHash, _vector);
     }
 
     function getDocument(
-        uint256 _documentHash,
+        string memory _documentHash,
         uint256 _index
     ) public view returns (Document memory document) {
         return documentMap[_documentHash][_index];
