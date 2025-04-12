@@ -11,6 +11,7 @@ import cors from "cors";
 import multer from "multer";
 import * as fs from "fs/promises";
 import { processDocument } from "./utils/analysisUtils";
+import agentRoutes from "./routes/agentRoutes";
 
 const ACCEPTABLE_FILE_TYPES: Record<string, "pdf" | "txt"> = {
   "application/pdf": "pdf",
@@ -24,6 +25,7 @@ const PORT = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
+app.use("/api/agents", agentRoutes);
 
 /**
  * Request type to handle file uploads via Multer

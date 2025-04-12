@@ -1,4 +1,4 @@
-import { getContract } from "./rightful";
+import { getContract } from './rightful';
 
 export async function getDocumentHashes() {
   const contract = getContract();
