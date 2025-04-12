@@ -21,6 +21,7 @@ export default function Home() {
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState('');
+  const { isConnected } = useAccount();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
