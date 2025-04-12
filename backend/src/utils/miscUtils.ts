@@ -1,4 +1,4 @@
-import { SHA256 } from "crypto-js";
+import cryptojs from "crypto-js";
 
 /**
  * Creates a hash from a string using SHA-256 from crypto-js
@@ -8,7 +8,7 @@ import { SHA256 } from "crypto-js";
  */
 export function createHash(input: string, length: number): string {
   // Generate SHA-256 hash
-  const hash = SHA256(input).toString();
+  const hash = cryptojs.SHA256(input).toString();
 
   // Truncate to desired length, or pad if needed
   if (hash.length <= length) {
