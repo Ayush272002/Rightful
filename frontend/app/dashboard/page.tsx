@@ -8,9 +8,9 @@ import { AlertCircle } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
+import Agent from '@/components/custom/Agent';
 
 export default function Dashboard() {
-  const { isConnected } = useAccount();
   const [alerts, setAlerts] = useState<
     {
       upload: string;
@@ -68,7 +68,7 @@ export default function Dashboard() {
 
       <main className="py-16 bg-gray-50">
         <div className="container mx-auto">
-          {!isConnected ? (
+          {!useAccount ? (
             <div className="text-center py-16">
               <h2 className="heading-medium mb-4 text-red-600">
                 Please connect your wallet to access your dashboard
@@ -148,6 +148,7 @@ export default function Dashboard() {
             </>
           )}
         </div>
+        <Agent pageName="Dashboard" details="View your alerts and manage your documents." />
       </main>
 
       <Footer />
