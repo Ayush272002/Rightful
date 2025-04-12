@@ -1,5 +1,5 @@
 import { JsonRpcProvider, Contract } from 'ethers';
-import RightfulABI from '../ABI/Rightful.json';
+import RightfulABI from '../ABI/RTFL.json';
 
 const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID?.trim();
 const RPC_URL = INFURA_PROJECT_ID

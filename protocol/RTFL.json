@@ -1,5 +1,5 @@
 [
-  {
+	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -174,7 +174,7 @@
 						"type": "string"
 					}
 				],
-				"internalType": "struct Rightful.Document",
+				"internalType": "struct RTFL.Document",
 				"name": "document",
 				"type": "tuple"
 			}

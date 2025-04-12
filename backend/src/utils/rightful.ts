@@ -1,5 +1,5 @@
 import { JsonRpcProvider, Contract } from "ethers";
-import RightfulABI from "../ABI/Rightful.json";
+import RightfulABI from "../ABI/RTFL.json";
 import dotenv from "dotenv";
 
 dotenv.config();

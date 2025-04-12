@@ -2,17 +2,17 @@
 
 pragma solidity >=0.8.2 <0.9.0;
 
-contract Rightful {
+contract RTFL {
 
     struct Document {
         string title;
         string description;
-        string resourceLocation; // link to content / location
-        string documentHash; // file hash
+        string resourceLocation; // off-chain link to the document
+        string documentHash; // identifier for the document (not necessarily unique)
         
-        uint256 tokenCount; // token count
-        uint256 lexicalDensity; // number of unique tokens
-        uint256 audienceEngagement;
+        uint256 tokenCount; // length of document in tokens (words)
+        uint256 lexicalDensity; // the ratio of unique tokens over the total number of tokens (words)
+        uint256 audienceEngagement; // how easily the document can be read and understood
 
         address submitterAddress; // address of submitting user
         uint256 submissionTimestamp; // timestamp for when submitted
