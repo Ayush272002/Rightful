@@ -6,7 +6,6 @@
 import { createHash } from "./miscUtils";
 import { extractPDFText } from "./pdfUtils";
 import { generateDocumentVector } from "./vectorUtils";
-import rs from "text-readability";
 
 /**
  * Interface for document processing results
@@ -53,12 +52,16 @@ export function countTokens(text: string): number {
  * @param text - The text content to analyse
  * @returns Object containing token count, lexical density, and readability score
  */
-export function analyseTextContent(
+export async function analyseTextContent(
   text: string
-): Pick<TextAnalysis, "tokenCount" | "lexicalDensity" | "readability"> {
+): Promise<
+  Pick<TextAnalysis, "tokenCount" | "lexicalDensity" | "readability">
+> {
   const tokenCount = countTokens(text);
   const lexicalDensity = calculateLexicalDensity(text);
-  const readability = rs.fleschKincaidGrade(text);
+
+  const rs = await import("text-readability");
+  const readability = rs.default.fleschKincaidGrade(text);
 
   return {
     tokenCount,
@@ -85,7 +88,7 @@ export async function generateTextEmbedding(text: string): Promise<number[]> {
  * @returns Promise resolving to complete text analysis results
  */
 export async function analyseText(text: string): Promise<TextAnalysis> {
-  const linguisticAnalysis = analyseTextContent(text);
+  const linguisticAnalysis = await analyseTextContent(text);
   const embedding = await generateTextEmbedding(text);
 
   return {
