@@ -819,10 +819,6 @@ export default function DocumentProcessor({
               ) : similarDocuments.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4">
                   {similarDocuments.map((doc, index) => {
-                    console.log(doc);
-                    console.log(`rgb(${Math.floor(doc.similarity*255)}, 100, 100)`);
-                    if (index == 1) doc.similarity = 0.66;
-                    if (index == 2) doc.similarity = 0.42;
                     const metadata = JSON.parse(doc.metadata);
                     return (
                       <div key={index} className="bg-muted/30 p-4 rounded-lg border-2">
