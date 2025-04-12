@@ -9,8 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Upload } from 'lucide-react';
 import axios from 'axios';
+import { ethers } from 'ethers';
+import PaymentABI from '../../ABI/Payment.json';
+import { useAccount, useWalletClient } from 'wagmi';
+import WalletConnect from '@/components/WalletConnect';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const CONTRACT_ABI = PaymentABI;
+const CONTRACT_ADDRESS_PAYMENT =
+  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_PAYMENT;
+const GOTO_DEPOSIT = process.env.NEXT_PUBLIC_GOTO_DEPOSIT;
 
 export default function Home() {
   const [title, setTitle] = useState('');
@@ -18,6 +26,26 @@ export default function Home() {
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState('');
+  const { address, isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient({ chainId: 11155111 });
+
+  const requestPayment = async () => {
+    if (!window.ethereum) throw new Error('MetaMask not found');
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const contract = new ethers.Contract(
+      CONTRACT_ADDRESS_PAYMENT!,
+      CONTRACT_ABI,
+      signer
+    );
+
+    const tx = await contract.increaseDeposit({
+      value: ethers.parseEther(GOTO_DEPOSIT!),
+    });
+
+    await tx.wait(); // Wait for confirmation
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -39,7 +67,12 @@ export default function Home() {
     formData.append('description', description);
     formData.append('file', file);
 
+    if (address) {
+      formData.append('publicKey', address);
+    }
+
     try {
+      await requestPayment();
       const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // Set content type for file upload
@@ -57,6 +90,7 @@ export default function Home() {
     <main className="container mx-auto p-4 max-w-md">
       <h1 className="text-2xl font-bold mb-4">Submit Form</h1>
 
+      {!isConnected && <WalletConnect />}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">Title</Label>
