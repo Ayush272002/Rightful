@@ -1,4 +1,4 @@
-"use client";
+'use client';
 /**
  * @fileoverview Dashboard page for Rightful where existing users can view alerts and manage their documents.
  * The page has the infringement alerts section migrated from the landing page.
@@ -11,14 +11,16 @@ import { useEffect, useState } from 'react';
 
 // Dummy hardcoded data for infringement alerts
 export default function Dashboard() {
-  const [alerts, setAlerts] = useState<{
-    upload: string;
-    title: string;
-    description: string;
-    similarity: number;
-    hash: string;
-    index: number;
-  }[]>([]);
+  const [alerts, setAlerts] = useState<
+    {
+      upload: string;
+      title: string;
+      description: string;
+      similarity: number;
+      hash: string;
+      index: number;
+    }[]
+  >([]);
 
   useEffect(() => {
     // Hardcoded JSON response simulating backend data.
@@ -26,7 +28,8 @@ export default function Dashboard() {
       {
         upload: 'Market Manipulation.pdf',
         title: 'Guide to Money Laundering',
-        description: 'A comprehensive guide detailing methods and risks associated with money laundering.',
+        description:
+          'A comprehensive guide detailing methods and risks associated with money laundering.',
         similarity: 85,
         hash: 'abc123',
         index: 1,
@@ -34,7 +37,8 @@ export default function Dashboard() {
       {
         upload: 'Gender Gap is Fake.txt',
         title: 'Why single mothers steal from landlords',
-        description: 'An investigative report examining the claims and circumstances related to this controversial issue.',
+        description:
+          'An investigative report examining the claims and circumstances related to this controversial issue.',
         similarity: 60,
         hash: 'def456',
         index: 2,
@@ -64,7 +68,8 @@ export default function Dashboard() {
 
       <main className="py-16 bg-gray-50">
         <div className="container mx-auto">
-          <h2 className="heading-medium mb-4 
+          <h2
+            className="heading-medium mb-4 
             {`${
               alerts.some(alert => alert.similarity >= 50)
                 ? 'text-black-600'
@@ -81,10 +86,10 @@ export default function Dashboard() {
                   alert.similarity >= 90
                     ? 'border-red-600 bg-red-50'
                     : alert.similarity >= 70
-                    ? 'border-yellow-500 bg-yellow-50'
-                    : alert.similarity >= 50
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-green-600 bg-green-50'
+                      ? 'border-yellow-500 bg-yellow-50'
+                      : alert.similarity >= 50
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-green-600 bg-green-50'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -93,10 +98,10 @@ export default function Dashboard() {
                       alert.similarity >= 90
                         ? 'text-red-600'
                         : alert.similarity >= 70
-                        ? 'text-yellow-500'
-                        : alert.similarity >= 50
-                        ? 'text-blue-500'
-                        : 'text-green-600'
+                          ? 'text-yellow-500'
+                          : alert.similarity >= 50
+                            ? 'text-blue-500'
+                            : 'text-green-600'
                     }`}
                   />
                   <h3
@@ -104,10 +109,10 @@ export default function Dashboard() {
                       alert.similarity >= 90
                         ? 'text-red-600'
                         : alert.similarity >= 70
-                        ? 'text-yellow-500'
-                        : alert.similarity >= 50
-                        ? 'text-blue-500'
-                        : 'text-green-600'
+                          ? 'text-yellow-500'
+                          : alert.similarity >= 50
+                            ? 'text-blue-500'
+                            : 'text-green-600'
                     }`}
                   >
                     {alert.upload} may be being infringed by {alert.title}
@@ -121,10 +126,10 @@ export default function Dashboard() {
                     alert.similarity >= 90
                       ? 'text-red-600'
                       : alert.similarity >= 70
-                      ? 'text-yellow-500'
-                      : alert.similarity >= 50
-                      ? 'text-blue-500'
-                      : 'text-green-600'
+                        ? 'text-yellow-500'
+                        : alert.similarity >= 50
+                          ? 'text-blue-500'
+                          : 'text-green-600'
                   }`}
                 >
                   {alert.similarity}%

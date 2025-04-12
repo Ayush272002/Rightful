@@ -1,4 +1,4 @@
-"use client";
+'use client';
 /**
  * @fileoverview Home page component for Rightful - an intellectual property protection platform
  * Implements the landing page with hero section and feature overview for new users.
@@ -34,8 +34,9 @@ export default function Home() {
                 Secure Intellectual Property on the Blockchain
               </h1>
               <p className="text-secondary text-lg mb-8 max-w-lg">
-                Rightful uses AI agents to detect document similarity and help you protect your
-                intellectual property through blockchain technology.
+                Rightful uses AI agents to detect document similarity and help
+                you protect your intellectual property through blockchain
+                technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="gap-2">
@@ -54,7 +55,9 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-4">
                     <Upload className="w-6 h-6 text-accent" />
                   </div>
-                  <h3 className="text-lg font-medium mb-2">Upload Your Document</h3>
+                  <h3 className="text-lg font-medium mb-2">
+                    Upload Your Document
+                  </h3>
                   <p className="text-sm text-secondary mb-6 max-w-xs mx-auto">
                     Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')})
                     or click to browse
@@ -109,7 +112,8 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="heading-medium mb-4">How Rightful Works</h2>
             <p className="text-secondary max-w-2xl mx-auto">
-              Our platform uses advanced AI and blockchain technology to detect similarities between documents and protect intellectual property.
+              Our platform uses advanced AI and blockchain technology to detect
+              similarities between documents and protect intellectual property.
             </p>
           </div>
 
@@ -122,7 +126,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">1. Upload Document</h3>
               <p className="text-secondary text-sm">
-                Upload your document to the blockchain and provide basic information
+                Upload your document to the blockchain and provide basic
+                information
               </p>
             </div>
 
@@ -133,7 +138,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">2. AI Analysis</h3>
               <p className="text-secondary text-sm">
-                Our AI extracts text and calculates vector representation for similarity comparison.
+                Our AI extracts text and calculates vector representation for
+                similarity comparison.
               </p>
             </div>
 
@@ -144,7 +150,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">3. View Results</h3>
               <p className="text-secondary text-sm">
-                See similar documents with percentage match and links to the original sources.
+                See similar documents with percentage match and links to the
+                original sources.
               </p>
             </div>
           </div>

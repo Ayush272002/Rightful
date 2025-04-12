@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 /**
  * @fileoverview Simplified Footer component for Rightful platform
@@ -23,7 +23,12 @@ export function Footer() {
       <div className="container">
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Brand */}
-          <div className="flex items-center space-x-2 hover:cursor-pointer" onClick={() => { router.push("/") }}>
+          <div
+            className="flex items-center space-x-2 hover:cursor-pointer"
+            onClick={() => {
+              router.push('/');
+            }}
+          >
             <Shield className="w-4 h-4 text-primary/80" />
             <span className="text-sm font-medium">Rightful</span>
           </div>

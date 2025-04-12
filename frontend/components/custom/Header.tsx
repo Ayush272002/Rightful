@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 /**
  * @fileoverview Header component for Rightful platform.
@@ -27,7 +27,12 @@ export function Header() {
     <header className="border-b border-border bg-white">
       <div className="container py-4 flex items-center justify-between">
         {/* Brand logo and icon */}
-        <div className="flex items-center space-x-3 hover:cursor-pointer" onClick={() => { router.push("/") }}>
+        <div
+          className="flex items-center space-x-3 hover:cursor-pointer"
+          onClick={() => {
+            router.push('/');
+          }}
+        >
           <Shield className="w-5 h-5 text-primary/80" />
           <span className="brand-logo font-dm-serif">Rightful</span>
         </div>
