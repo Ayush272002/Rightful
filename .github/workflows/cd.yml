@@ -26,9 +26,9 @@ jobs:
 
       - name: Set image name
         run: |
-            REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-            REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-            echo "IMAGE=ghcr.io/${REPO_OWNER}/${REPO_NAME}-backend:latest" >> $GITHUB_ENV
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/${REPO_OWNER}/${REPO_NAME}-backend:latest" >> $GITHUB_ENV
 
       - name: Build Docker image from ./backend
         run: |
@@ -37,3 +37,25 @@ jobs:
 
       - name: Push Docker image
         run: docker push $IMAGE
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo docker stop backend || true
+            sudo docker rm backend || true
+            sudo docker system prune -af
+            sudo docker volume prune -f
+            sudo docker pull ghcr.io/ayush272002/ayush272002/rightful-backend:latest
+            sudo docker run -d \
+              --name backend \
+              -p 8000:8000 \
+              -e PORT=8000 \
+              -e INFURA_PROJECT_ID="${{ secrets.INFURA_PROJECT_ID }}" \
+              -e CONTRACT_ADDRESS="${{ secrets.CONTRACT_ADDRESS }}" \
+              -e PRIVATE_KEY="${{ secrets.PRIVATE_KEY }}" \
+              -e GOOGLE_API_KEY="${{ secrets.GOOGLE_API_KEY }}" \
+              ghcr.io/ayush272002/ayush272002/rightful-backend:latest
