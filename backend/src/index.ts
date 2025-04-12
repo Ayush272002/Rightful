@@ -12,6 +12,7 @@ import multer from "multer";
 import * as fs from "fs/promises";
 import { processDocument } from "./utils/analysisUtils";
 import agentRoutes from "./routes/agentRoutes";
+import { storeDocument } from "./utils/storeDocument";
 
 const ACCEPTABLE_FILE_TYPES: Record<string, "pdf" | "txt"> = {
   "application/pdf": "pdf",
@@ -37,6 +38,11 @@ interface MulterRequest extends express.Request {
 app.post("/upload", upload.single("file"), async (req: MulterRequest, res) => {
   console.log("Processing new upload request...");
 
+  const { title, url, description } = req.body;
+  console.log("Title:", title);
+  console.log("URL:", url);
+  console.log("Description:", description);
+
   if (!req.file) {
     res.status(400).send("No file uploaded");
     return;
@@ -57,6 +63,21 @@ app.post("/upload", upload.single("file"), async (req: MulterRequest, res) => {
     }
 
     const analysisResult = await processDocument(fileBuffer, fileType);
+    const { documentHash } = analysisResult;
+
+    console.log(documentHash);
+    console.log(analysisResult);
+    console.log(Object.values(analysisResult.embedding).join(","));
+    await storeDocument({
+      title,
+      description,
+      resourceLocation: url,
+      documentHash,
+      tokenCount: analysisResult.tokenCount,
+      lexicalDensity: analysisResult.lexicalDensity,
+      audienceEngagement: analysisResult.readability,
+      vector: Object.values(analysisResult.embedding).join(","),
+    });
     res.json(analysisResult);
   } catch (error) {
     if (req.file?.path) {
