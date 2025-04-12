@@ -77,7 +77,7 @@ export default function Home() {
             {/* Left half - Value proposition (2/3 width) */}
             <div className="md:col-span-2">
               <h1 className="heading-large mb-4">
-                Your Personal Intellectual Property Vigilante on the Blockchain!
+                The AI Protecting your Intellectual Property On-Chain
               </h1>
               <p className="text-secondary text-lg mb-8 max-w-lg">
                 Rightful uses AI agents to detect document similarity and help
