@@ -1,8 +1,5 @@
 import { ethers } from "ethers";
 import { getContract } from "./rightful";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 export async function storeDocument(data: {
   title: string;
