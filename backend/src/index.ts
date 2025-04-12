@@ -75,7 +75,7 @@ const server = app.listen(PORT, () => {
 });
 
 process.on("SIGINT", () => {
-  console.log("SIGINT received. shutting down gracefully...");
+  console.log("SIGINT received. Shutting down gracefully...");
 
   server.close(() => {
     console.log("Server closed");
