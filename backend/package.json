@@ -25,6 +25,7 @@
     "langchain": "^0.3.21",
     "multer": "^1.4.5-lts.2",
     "pdf-parse": "^1.1.1",
+    "string-similarity": "^4.0.4",
     "text-readability": "^1.1.1"
   },
   "devDependencies": {

@@ -3,8 +3,8 @@
  * Handles contract instantiation and connection management on the Sepolia testnet.
  */
 
-import { JsonRpcProvider, Contract } from 'ethers';
-import RightfulABI from '../ABI/Rightful.json';
+import { Contract } from 'ethers';
+import RightfulABI from '../ABI/RTFL.json';
 import { getSepoliaProvider } from '@/utils/provider';
 
 // Environment variables for network configuration

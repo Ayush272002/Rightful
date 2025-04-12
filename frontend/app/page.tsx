@@ -1,7 +1,8 @@
 'use client';
 /**
- * @fileoverview Home page component for Rightful - an intellectual property protection platform
- * Implements the landing page with hero section and feature overview for new users.
+ * @fileoverview Home page component for Rightful - an intellectual property protection platform.
+ * Implements a hero section with a half-and-half layout: left has the title/description and right shows a bobbing AI bot.
+ * The bot smoothly transitions from a large floating image to a small fixed chat icon as you scroll.
  *
  * @todo Add proper error handling for file uploads
  * @todo Implement drag-and-drop functionality
@@ -11,14 +12,53 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Upload, FileText, BarChart3, Link2 } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ChatWindow from '../components/custom/ChatWindow';
-import ChatIcon from '../components/custom/ChatIcon';
 
 // Constants for reusable values
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];
+const SCROLL_THRESHOLD = 50; // Start transition
+const SCROLL_END = 70; // End transition
 
 export default function Home() {
+  const [showChat, setShowChat] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 transition value
+  const botRef = useRef<HTMLImageElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+
+      // Calculate transition progress (0 at top, 1 when fully scrolled past threshold)
+      if (scrollPosition <= SCROLL_THRESHOLD) {
+        setScrollProgress(0);
+      } else if (scrollPosition >= SCROLL_END) {
+        setScrollProgress(1);
+      } else {
+        // Smooth transition between thresholds
+        setScrollProgress(
+          (scrollPosition - SCROLL_THRESHOLD) / (SCROLL_END - SCROLL_THRESHOLD)
+        );
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Update the botStyle to transition correctly from top-right to bottom-right
+  const botStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: scrollProgress === 0 ? '25%' : '85%', // Start near the top of hero section
+    right: scrollProgress === 0 ? '2%' : `${scrollProgress}rem`, // Start at right side of hero section
+    bottom: scrollProgress === 0 ? 'auto' : `${4 * scrollProgress}rem`,
+    width: `${16 - scrollProgress * 10}rem`, // Shrink from large to small
+    transform: `translateY(${scrollProgress * 1}vh)`, // Move down as we scroll
+    transition: 'all 0.3s ease-out',
+    zIndex: 50,
+    animationPlayState: scrollProgress > 0.5 ? 'paused' : 'running',
+  };
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -29,17 +69,19 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* header component handles navigation and branding */}
       <Header />
 
-      {/* Hero section with main CTA and upload widget */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-white">
+      {/* Hero section with main CTA */}
+      <section
+        ref={heroSectionRef}
+        className="relative py-16 md:py-14 px-5 bg-gradient-to-b from-background to-white"
+      >
         <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left column - Value proposition */}
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap- items-center">
+            {/* Left half - Value proposition (2/3 width) */}
+            <div className="md:col-span-2">
               <h1 className="heading-large mb-4">
-                Secure Intellectual Property on the Blockchain
+                The AI Protecting your Intellectual Property On-Chain
               </h1>
               <p className="text-secondary text-lg mb-8 max-w-lg">
                 Rightful uses AI agents to detect document similarity and help
@@ -48,7 +90,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="gap-2">
-                  Upload Document <ArrowRight className="w-4 h-4" />
+                  <a href="upload">Upload Document</a>
                 </Button>
                 <Button size="lg" variant="outline" className="gap-2">
                   How It Works <ArrowRight className="w-4 h-4" />
@@ -56,61 +98,63 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right column - Upload widget */}
-            <div className="relative rounded-xl overflow-hidden border border-border bg-white shadow-sm p-8">
-              <div className="upload-area">
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                    <Upload className="w-6 h-6 text-accent" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">
-                    Upload Your Document
-                  </h3>
-                  <p className="text-sm text-secondary mb-6 max-w-xs mx-auto">
-                    Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')})
-                    or click to browse
-                  </p>
-                  <Button size="sm">Select File</Button>
-                </div>
-              </div>
+            {/* Right column - empty space where bot will visually appear */}
+            <div className="md:col-span-1 relative">
+              {/* Background for the AI Bot */}
+              <img
+                src="AIBackground.png"
+                alt="AI Background"
+                className="absolute inset-0 w-full h-full object-contain pl-0"
+              />
+              {/* This is just a placeholder to maintain the grid layout */}
+              <div style={{ height: '300px' }}></div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Our Services Section */}
-          <section className="py-12">
-            <div className="container mx-auto">
-              <h2 className="heading-medium text-center mb-6">Our Services</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="card flex flex-col items-center justify-center p-6">
-                  <FileText className="w-8 h-8 text-accent mb-4" />
-                  <Button size="lg" variant="outline">
-                    Register my Intellectual Content
-                  </Button>
-                  <p className="text-sm text-secondary mt-2 text-center">
-                    Securely register and safeguard your original documents.
-                  </p>
-                </div>
-                <div className="card flex flex-col items-center justify-center p-6">
-                  <Link2 className="w-8 h-8 text-accent mb-4" />
-                  <Button size="lg" variant="outline">
-                    Link to Google Docs
-                  </Button>
-                  <p className="text-sm text-secondary mt-2 text-center">
-                    Connect to Google Docs for seamless integration.
-                  </p>
-                </div>
-                <div className="card flex flex-col items-center justify-center p-6">
-                  <BarChart3 className="w-8 h-8 text-accent mb-4" />
-                  <Button size="lg" variant="outline">
-                    Check my work for plagiarism
-                  </Button>
-                  <p className="text-sm text-secondary mt-2 text-center">
-                    Analyze your document for originality and overlap.
-                  </p>
-                </div>
-              </div>
+      {/* Single AI Bot that transitions as you scroll */}
+      <img
+        src="AIHead.png"
+        alt="AI Chat Bot"
+        className="cursor-pointer animate-bob"
+        style={botStyle}
+        onClick={() => setIsChatOpen(!isChatOpen)}
+      />
+
+      {/* Our Services Section */}
+      <section className="py-12">
+        <div className="container mx-auto">
+          <h2 className="heading-medium text-center mb-6">Our Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="card flex flex-col items-center justify-center p-6">
+              <FileText className="w-8 h-8 text-accent mb-4" />
+              <Button size="lg" variant="outline">
+                Register my Intellectual Content
+              </Button>
+              <p className="text-sm text-secondary mt-2 text-center">
+                Securely register and safeguard your original documents.
+              </p>
             </div>
-          </section>
+            <div className="card flex flex-col items-center justify-center p-6">
+              <Link2 className="w-8 h-8 text-accent mb-4" />
+              <Button size="lg" variant="outline">
+                Link to Google Docs
+              </Button>
+              <p className="text-sm text-secondary mt-2 text-center">
+                Connect your Google Docs for seamless integration.
+              </p>
+            </div>
+            <div className="card flex flex-col items-center justify-center p-6">
+              <BarChart3 className="w-8 h-8 text-accent mb-4" />
+              <Button size="lg" variant="outline">
+                Check my work for plagiarism
+              </Button>
+              <p className="text-sm text-secondary mt-2 text-center">
+                Analyze your document for originality and overlap.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -124,8 +168,6 @@ export default function Home() {
               similarities between documents and protect intellectual property.
             </p>
           </div>
-
-          {/* Process steps grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Step 1 */}
             <div className="card">
@@ -135,7 +177,7 @@ export default function Home() {
               <h3 className="text-xl font-medium mb-2">1. Upload Document</h3>
               <p className="text-secondary text-sm">
                 Upload your document to the blockchain and provide basic
-                information
+                information.
               </p>
             </div>
 
@@ -168,19 +210,10 @@ export default function Home() {
 
       <Footer />
 
-      {/* Chat components - only render on client-side */}
-      {isMounted && (
+      {/* Chat window - only render when open and on client-side */}
+      {isMounted && isChatOpen && (
         <div className="fixed bottom-8 right-8 z-50 pointer-events-auto">
-          {isChatOpen ? (
-            <ChatWindow onClose={() => setIsChatOpen(false)} />
-          ) : (
-            <ChatIcon
-              onClick={() => {
-                console.log('Chat icon clicked, setting isChatOpen to true');
-                setIsChatOpen(true);
-              }}
-            />
-          )}
+          <ChatWindow onClose={() => setIsChatOpen(false)} />
         </div>
       )}
     </div>

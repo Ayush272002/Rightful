@@ -39,7 +39,7 @@ export function Header() {
           }}
         >
           <Shield className="w-5 h-5 text-primary/80" />
-          <span className="brand-logo font-dm-serif">Rightful</span>
+          <span className="brand-logo font-dm-serif">Rightful AI</span>
         </div>
 
         {/* Desktop navigation */}
