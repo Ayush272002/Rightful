@@ -49,6 +49,7 @@ jobs:
             sudo docker rm backend || true
             sudo docker system prune -af
             sudo docker volume prune -f
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             sudo docker pull ghcr.io/ayush272002/ayush272002/rightful-backend:latest
             sudo docker run -d \
               --name backend \
