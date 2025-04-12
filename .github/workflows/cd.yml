@@ -52,6 +52,8 @@ jobs:
               -e PORT=8000 \
               -e INFURA_PROJECT_ID="${{ secrets.INFURA_PROJECT_ID }}" \
               -e CONTRACT_ADDRESS="${{ secrets.CONTRACT_ADDRESS }}" \
+              -e CONTRACT_ADDRESS_PAYMENT="${{ secrets.CONTRACT_ADDRESS_PAYMENT }}" \
               -e PRIVATE_KEY="${{ secrets.PRIVATE_KEY }}" \
               -e GOOGLE_API_KEY="${{ secrets.GOOGLE_API_KEY }}" \
+              -e GOTO_DEPOSIT="${{ secrets.GOTO_DEPOSIT }}" \
               ayush272002/rightful-backend:latest
