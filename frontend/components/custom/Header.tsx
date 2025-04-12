@@ -34,7 +34,7 @@ export function Header() {
         {/* Brand logo and icon */}
         <div className="flex items-center space-x-3 hover:cursor-pointer" onClick={() => { router.push("/") }}>
           <Shield className="w-5 h-5 text-primary/80" />
-          <span className="brand-logo font-dm-serif">Rightful</span>
+          <span className="brand-logo font-dm-serif">Rightful AI</span>
         </div>
 
         {/* Desktop navigation */}
