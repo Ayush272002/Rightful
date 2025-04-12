@@ -30,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      
+
       // Calculate transition progress (0 at top, 1 when fully scrolled past threshold)
       if (scrollPosition <= SCROLL_THRESHOLD) {
         setScrollProgress(0);
@@ -38,12 +38,14 @@ export default function Home() {
         setScrollProgress(1);
       } else {
         // Smooth transition between thresholds
-        setScrollProgress((scrollPosition - SCROLL_THRESHOLD) / (SCROLL_END - SCROLL_THRESHOLD));
+        setScrollProgress(
+          (scrollPosition - SCROLL_THRESHOLD) / (SCROLL_END - SCROLL_THRESHOLD)
+        );
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Update the botStyle to transition correctly from top-right to bottom-right
@@ -52,7 +54,7 @@ export default function Home() {
     top: scrollProgress === 0 ? '25%' : '85%', // Start near the top of hero section
     right: scrollProgress === 0 ? '2%' : `${scrollProgress}rem`, // Start at right side of hero section
     bottom: scrollProgress === 0 ? 'auto' : `${4 * scrollProgress}rem`,
-    width: `${16 - (scrollProgress * 10)}rem`, // Shrink from large to small
+    width: `${16 - scrollProgress * 10}rem`, // Shrink from large to small
     transform: `translateY(${scrollProgress * 1}vh)`, // Move down as we scroll
     transition: 'all 0.3s ease-out',
     zIndex: 50,
@@ -71,7 +73,10 @@ export default function Home() {
       <Header />
 
       {/* Hero section with main CTA */}
-      <section ref={heroSectionRef} className="relative py-16 md:py-14 px-5 bg-gradient-to-b from-background to-white">
+      <section
+        ref={heroSectionRef}
+        className="relative py-16 md:py-14 px-5 bg-gradient-to-b from-background to-white"
+      >
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-3 gap- items-center">
             {/* Left half - Value proposition (2/3 width) */}
@@ -86,20 +91,20 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="gap-2">
-                <a href='upload'>Upload Document</a>
+                  <a href="upload">Upload Document</a>
                 </Button>
                 <Button size="lg" variant="outline" className="gap-2">
                   How It Works <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             {/* Right column - empty space where bot will visually appear */}
             <div className="md:col-span-1 relative">
               {/* Background for the AI Bot */}
-              <img 
-                src="AIBackground.png" 
-                alt="AI Background" 
+              <img
+                src="AIBackground.png"
+                alt="AI Background"
                 className="absolute inset-0 w-full h-full object-contain pl-0"
               />
               {/* This is just a placeholder to maintain the grid layout */}
@@ -172,7 +177,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-medium mb-2">1. Upload Document</h3>
               <p className="text-secondary text-sm">
-                Upload your document to the blockchain and provide basic information.
+                Upload your document to the blockchain and provide basic
+                information.
               </p>
             </div>
 

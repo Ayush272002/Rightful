@@ -7,7 +7,7 @@ import ChatWindow from './ChatWindow';
  * Agent component that displays the AI assistant icon on pages
  * This allows the AI to be present across the site (except landing page)
  */
-export default function Agent(props: {pageName: string, details: string}) {
+export default function Agent(props: { pageName: string; details: string }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 

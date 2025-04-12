@@ -150,7 +150,10 @@ export default function Dashboard() {
             </>
           )}
         </div>
-        <Agent pageName="Dashboard" details="View your alerts and manage your documents." />
+        <Agent
+          pageName="Dashboard"
+          details="View your alerts and manage your documents."
+        />
       </main>
 
       <Footer />
