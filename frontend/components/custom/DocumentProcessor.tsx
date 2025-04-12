@@ -266,6 +266,18 @@ export default function DocumentProcessor({
   const [similarDocuments, setSimilarDocuments] = useState<any[]>([]);
   const [isLoadingSimilar, setIsLoadingSimilar] = useState<boolean>(false);
 
+  // Function to update onBlockchain status in localStorage
+  const updateBlockchainStatus = (documentHash: string) => {
+    const currentData = localStorage.getItem('currentUploadData');
+    if (currentData) {
+      const data = JSON.parse(currentData);
+      if (data.documentHash === documentHash) {
+        data.onBlockchain = true;
+        localStorage.setItem('currentUploadData', JSON.stringify(data));
+      }
+    }
+  };
+
   // Function declaration (hoisted) instead of useCallback
   async function handleFileUpload(file: File) {
     console.log('Starting file upload:', file.name);
@@ -317,6 +329,7 @@ export default function DocumentProcessor({
           ...finalResult,
           fileName: file.name,
           uploadDate: new Date().toISOString(),
+          onBlockchain: false,
         })
       );
 
