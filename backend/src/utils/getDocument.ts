@@ -29,3 +29,18 @@ export async function getDocument(documentHash: string, index: number): Promise<
     vector: doc.vector
   };
 }
+
+export async function getDocumentsByHash(documentHash: string): Promise<DocumentData[]> {
+  let index = 0;
+  let res: DocumentData[] = [];
+  while (true) {
+    try {
+      const document = await getDocument(documentHash, index);
+      res.push(document);
+      index += 1;
+    } catch (err) {
+      break;
+    }
+  }
+  return res;
+}
