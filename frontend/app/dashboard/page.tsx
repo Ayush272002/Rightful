@@ -22,6 +22,8 @@ export default function Dashboard() {
     }[]
   >([]);
 
+  const { isConnected } = useAccount();
+
   useEffect(() => {
     // Hardcoded JSON response simulating backend data.
     const mockAlerts = [
