@@ -4,9 +4,19 @@
  * ensure safe and relevant responses.
  */
 
-import { Router, RequestHandler } from "express";
-import { generateTextWithContext } from "../utils/llmUtils";
-import * as AgentInstructions from "../utils/agentInstructions";
+import express, {
+  Router,
+  Request,
+  Response,
+  NextFunction,
+  RequestHandler,
+} from "express";
+import { generateText, generateTextWithContext } from "../utils/llmUtils";
+import {
+  SAFETY_AGENT_INSTRUCTIONS,
+  PLATFORM_GUIDE_AGENT_INSTRUCTIONS,
+  DOCUMENT_CLASSIFIER_INSTRUCTIONS,
+} from "../utils/agentInstructions";
 
 const router = Router();
 
@@ -16,97 +26,115 @@ interface ChatRequest {
 }
 
 interface DocumentRequest {
-  document_text: string;
+  text: string;
   classification_type?: string;
 }
 
-/**
- * Handles chat requests with safety validation and platform guidance
- * @param req Express request object containing chat message and context
- * @param res Express response object
- */
-const handleChat: RequestHandler<{}, any, ChatRequest> = async (req, res) => {
+// Helper function to parse JSON response
+const parseJsonResponse = (response: string): any => {
   try {
-    const { message, context } = req.body;
-
-    // Initial safety check
-    // TODO: Add rate limiting
-    const safetyCheck = await generateTextWithContext(
-      JSON.stringify({ user_input: message, latest_context_summary: context }),
-      AgentInstructions.SAFETY_AGENT_INSTRUCTIONS
-    );
-
-    if (!safetyCheck) {
-      res.status(500).json({ error: "Failed to perform safety check" });
-      return;
+    // Remove any potential text before or after the JSON object
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("No JSON object found in response");
     }
-
-    const safetyResult = JSON.parse(safetyCheck);
-
-    // Return early if content is flagged as unsafe
-    if (safetyResult.status !== "SAFE") {
-      res.json({
-        status: safetyResult.status,
-        message: safetyResult.explanation,
-      });
-      return;
-    }
-
-    // Process safe messages with guide agent
-    const response = await generateTextWithContext(
-      JSON.stringify({ user_input: message, latest_context_summary: context }),
-      AgentInstructions.PLATFORM_GUIDE_AGENT_INSTRUCTIONS
-    );
-
-    if (!response) {
-      res.status(500).json({ error: "Failed to generate response" });
-      return;
-    }
-
-    const guideResponse = JSON.parse(response);
-    res.json({
-      status: "SAFE",
-      message: guideResponse.response,
-    });
+    return JSON.parse(jsonMatch[0]);
   } catch (error) {
-    console.error("Chat processing error:", error);
-    res.status(500).json({ error: "Failed to process chat request" });
+    console.error("Error parsing JSON response:", error);
+    throw new Error("Invalid JSON response from LLM");
   }
 };
 
-/**
- * Handles document classification requests
- * @param req Express request object containing document text and classification type
- * @param res Express response object
- */
-const handleDocumentClassification: RequestHandler<
-  {},
-  any,
-  DocumentRequest
-> = async (req, res) => {
-  try {
-    const { document_text, classification_type } = req.body;
+// Chat endpoint
+router.post(
+  "/chat",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { message, context } = req.body as ChatRequest;
 
-    // Send document for classification
-    const response = await generateTextWithContext(
-      JSON.stringify({ document_text, classification_type }),
-      AgentInstructions.DOCUMENT_CLASSIFIER_INSTRUCTIONS
-    );
+      if (!message) {
+        res.status(400).json({ error: "Message is required" });
+        return;
+      }
 
-    if (!response) {
-      res.status(500).json({ error: "Failed to classify document" });
-      return;
+      // First, check if the message is safe using the Safety Agent
+      const safetyCheck = await generateTextWithContext(
+        SAFETY_AGENT_INSTRUCTIONS,
+        JSON.stringify({
+          user_input: message,
+          latest_context_summary: context || "",
+        })
+      );
+
+      if (!safetyCheck) {
+        res.status(500).json({ error: "Failed to perform safety check" });
+        return;
+      }
+
+      const safetyResult = parseJsonResponse(safetyCheck);
+
+      if (safetyResult.status !== "SAFE") {
+        res.status(400).json({
+          status: safetyResult.status,
+          message: safetyResult.explanation,
+          error: "Message rejected",
+        });
+        return;
+      }
+
+      // If safe, generate response using the Platform Guide Agent
+      const response = await generateTextWithContext(
+        PLATFORM_GUIDE_AGENT_INSTRUCTIONS,
+        JSON.stringify({
+          user_input: message,
+          latest_context_summary: context || "",
+        })
+      );
+
+      if (!response) {
+        res.status(500).json({ error: "Failed to generate response" });
+        return;
+      }
+
+      const parsedResponse = parseJsonResponse(response);
+      res.json(parsedResponse);
+    } catch (error) {
+      next(error);
     }
-
-    const classification = JSON.parse(response);
-    res.json(classification);
-  } catch (error) {
-    console.error("Document classification error:", error);
-    res.status(500).json({ error: "Failed to classify document" });
   }
-};
+);
 
-router.post("/chat", handleChat);
-router.post("/classify", handleDocumentClassification);
+// Document classification endpoint
+router.post(
+  "/classify-document",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { text, classification_type } = req.body as DocumentRequest;
+
+      if (!text) {
+        res.status(400).json({ error: "Document text is required" });
+        return;
+      }
+
+      const response = await generateTextWithContext(
+        DOCUMENT_CLASSIFIER_INSTRUCTIONS,
+        JSON.stringify({
+          document_text: text,
+          classification_type: classification_type || "",
+        })
+      );
+
+      if (!response) {
+        res.status(500).json({ error: "Failed to classify document" });
+        return;
+      }
+
+      const parsedResponse = parseJsonResponse(response);
+      res.json(parsedResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default router;

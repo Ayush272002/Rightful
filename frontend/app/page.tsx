@@ -12,12 +12,20 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Upload, FileText, BarChart3, Link2 } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState } from 'react';
+import ChatWindow from './components/custom/ChatWindow';
+import ChatIcon from './components/custom/ChatIcon';
 
 // Constants for reusable values
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];
 
 export default function Home() {
-  const [showChat, setShowChat] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Use useEffect to handle client-side rendering
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -160,21 +168,21 @@ export default function Home() {
 
       <Footer />
 
-      {/* Floating AI Chat Icon and Chat Window */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
-        {showChat && (
-          <div className="mb-4 w-64 h-80 bg-white border border-gray-300 shadow-lg rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Chat</h3>
-            {/* Chat window content placeholder */}
-          </div>
-        )}
-        <img
-          src="AIHead.png"
-          alt="AI Chat"
-          className="w-16 h-16 cursor-pointer animate-bounce"
-          onClick={() => setShowChat(!showChat)}
-        />
-      </div>
+      {/* Chat components - only render on client-side */}
+      {isMounted && (
+        <div className="fixed bottom-8 right-8 z-50 pointer-events-auto">
+          {isChatOpen ? (
+            <ChatWindow onClose={() => setIsChatOpen(false)} />
+          ) : (
+            <ChatIcon
+              onClick={() => {
+                console.log('Chat icon clicked, setting isChatOpen to true');
+                setIsChatOpen(true);
+              }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
