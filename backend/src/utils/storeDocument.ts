@@ -8,7 +8,7 @@ export async function storeDocument(data: {
   title: string;
   description: string;
   resourceLocation: string;
-  documentHash: number;
+  documentHash: string;
   tokenCount: number;
   lexicalDensity: number;
   audienceEngagement: number;

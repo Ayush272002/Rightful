@@ -1,7 +1,31 @@
 import { getContract } from "./rightful";
 
-export async function getDocument(documentHash: number, index: number) {
+type DocumentData = {
+  title: string,
+  description: string,
+  resourceLocation: string,
+  documentHash: string,
+  tokenCount: number,
+  lexicalDensity: number,
+  audienceEngagement: number,
+  submitterAddress: string,
+  submissionTimestamp: Date,
+  vector: string
+} 
+
+export async function getDocument(documentHash: number, index: number): Promise<DocumentData> {
   const contract = getContract();
   const doc = await contract.getDocument(documentHash, index);
-  return doc;
+  return {
+    title: doc.title,
+    description: doc.description,
+    resourceLocation: doc.resourceLocation,
+    documentHash: doc.documentHash,
+    tokenCount: parseInt(doc.tokenCount),
+    lexicalDensity: parseInt(doc.lexicalDensity) / 1000000,
+    audienceEngagement: parseInt(doc.audienceEngagement) / 1000000,
+    submitterAddress: doc.submitterAddress,
+    submissionTimestamp: new Date(doc.submissionTimestamp),
+    vector: doc.vector
+  };
 }
