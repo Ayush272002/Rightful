@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
   try {
     const requestBody = await request.json();
 
-    const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+    const BACKEND_URL =
+      process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
     const CHAT_ENDPOINT = `${BACKEND_URL}/api/agents/chat`;
 
     try {

@@ -8,9 +8,9 @@ import { AlertCircle } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
+import Agent from '@/components/custom/Agent';
 
 export default function Dashboard() {
-  const { isConnected } = useAccount();
   const [alerts, setAlerts] = useState<
     {
       upload: string;
@@ -21,6 +21,8 @@ export default function Dashboard() {
       index: number;
     }[]
   >([]);
+
+  const { isConnected } = useAccount();
 
   useEffect(() => {
     // Hardcoded JSON response simulating backend data.
@@ -148,6 +150,10 @@ export default function Dashboard() {
             </>
           )}
         </div>
+        <Agent
+          pageName="Dashboard"
+          details="View your alerts and manage your documents."
+        />
       </main>
 
       <Footer />
