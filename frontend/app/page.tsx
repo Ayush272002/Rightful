@@ -92,9 +92,6 @@ export default function Home() {
                 <Button size="lg" className="gap-2">
                   <a href="upload">Upload Document</a>
                 </Button>
-                <Button size="lg" variant="outline" className="gap-2">
-                  How It Works <ArrowRight className="w-4 h-4" />
-                </Button>
               </div>
             </div>
 
