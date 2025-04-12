@@ -3,7 +3,7 @@ import PaymentABI from "../ABI/Payment.json";
 
 import { ethers } from "ethers";
 
-const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID?.trim();
+const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID?.trim();
 const RPC_URL = INFURA_PROJECT_ID
   ? `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`
   : "https://sepolia.drpc.org";
@@ -20,10 +20,10 @@ export function getContract(signerOrProvider?: any) {
 }
 
 export async function getTotalDeposit(address: string): Promise<number> {
-  const PRIVATE_KEY = process.env.NEXT_PUBLIC_PRIVATE_KEY;
+  const PRIVATE_KEY = process.env.PRIVATE_KEY;
   if (!PRIVATE_KEY) throw new Error("Private key is missing!");
 
-  const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID?.trim();
+  const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID?.trim();
   const RPC_URL = INFURA_PROJECT_ID
     ? `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`
     : "https://sepolia.drpc.org";
@@ -37,11 +37,14 @@ export async function getTotalDeposit(address: string): Promise<number> {
   return await contract.deposit(address);
 }
 
-export async function ownerWithdrawFrom(address: string, amount: number): Promise<boolean> {
-  const PRIVATE_KEY = process.env.PRIVATE_KEY;  
+export async function ownerWithdrawFrom(
+  address: string,
+  amount: bigint
+): Promise<boolean> {
+  const PRIVATE_KEY = process.env.PRIVATE_KEY;
   if (!PRIVATE_KEY) throw new Error("Private key is missing!");
 
-  const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID?.trim();
+  const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID?.trim();
   const RPC_URL = INFURA_PROJECT_ID
     ? `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`
     : "https://sepolia.drpc.org";
@@ -65,10 +68,10 @@ export async function ownerWithdrawFrom(address: string, amount: number): Promis
 }
 
 export async function increaseDeposit(amount: number): Promise<boolean> {
-  const PRIVATE_KEY = process.env.NEXT_PUBLIC_PRIVATE_KEY;
+  const PRIVATE_KEY = process.env.PRIVATE_KEY;
   if (!PRIVATE_KEY) throw new Error("Private key is missing!");
 
-  const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID?.trim();
+  const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID?.trim();
   const RPC_URL = INFURA_PROJECT_ID
     ? `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`
     : "https://sepolia.drpc.org";
@@ -81,9 +84,9 @@ export async function increaseDeposit(amount: number): Promise<boolean> {
 
   try {
     const tx = await contract.increaseDeposit({
-      value: amount
+      value: amount,
     });
-  
+
     await tx.wait();
     console.log("Deposit successful!");
 
@@ -92,5 +95,4 @@ export async function increaseDeposit(amount: number): Promise<boolean> {
     console.error(err);
     return false;
   }
-
 }
