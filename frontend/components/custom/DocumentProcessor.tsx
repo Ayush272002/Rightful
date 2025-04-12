@@ -825,7 +825,6 @@ export default function DocumentProcessor({
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex gap-2">
                             <div className="text-white p-1 rounded-sm text-sm" style={{
-                              // backgroundColor: `rgb(${Math.floor(doc.similarity*155)}, ${Math.floor((1-doc.similarity)*155)}, 0)`,
                               backgroundColor: similarityColourCalculator(doc.similarity),
                             }}>{Math.round(doc.similarity * 100)}%</div>
                             <h4 className="font-medium">{metadata.title}</h4>
