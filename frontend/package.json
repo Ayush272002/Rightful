@@ -1,5 +1,5 @@
 {
-  "name": "encode-ai",
+  "name": "rightful",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -33,22 +33,15 @@
     "wagmi": "^2.14.16"
   },
   "devDependencies": {
-    "@flarenetwork/flare-periphery-contracts": "^0.1.16",
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-    "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "@nomiclabs/hardhat-waffle": "^2.0.0",
-    "@typechain/hardhat": "^6.1.6",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
-    "chai": "^4.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
-    "ethers": "^5.8.0",
-    "hardhat": "^2.22.15",
     "husky": "^9.1.7",
+    "pino-pretty": "^13.0.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

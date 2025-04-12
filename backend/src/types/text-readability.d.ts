@@ -1,20 +1,21 @@
 declare module "text-readability" {
-  interface ReadabilityStats {
-    fleschReadingEase(text: string): number;
-    fleschKincaidGrade(text: string): number;
-    smogIndex(text: string): number;
-    colemanLiauIndex(text: string): number;
-    automatedReadabilityIndex(text: string): number;
-    daleChallReadabilityScore(text: string): number;
-    difficultWords(text: string): number;
-    linsearWriteFormula(text: string): number;
-    gunningFog(text: string): number;
-    textStandard(text: string, floatOutput?: boolean): string | number;
-    syllableCount(text: string, lang?: string): number;
-    lexiconCount(text: string, removePunctuation?: boolean): number;
-    sentenceCount(text: string): number;
-  }
-
-  const rs: ReadabilityStats;
-  export default rs;
+  export function fleschReadingEase(text: string): number;
+  export function fleschKincaidGrade(text: string): number;
+  export function smogIndex(text: string): number;
+  export function colemanLiauIndex(text: string): number;
+  export function automatedReadabilityIndex(text: string): number;
+  export function daleChallReadabilityScore(text: string): number;
+  export function difficultWords(text: string): number;
+  export function linsearWriteFormula(text: string): number;
+  export function gunningFog(text: string): number;
+  export function textStandard(
+    text: string,
+    floatOutput?: boolean
+  ): string | number;
+  export function syllableCount(text: string, lang?: string): number;
+  export function lexiconCount(
+    text: string,
+    removePunctuation?: boolean
+  ): number;
+  export function sentenceCount(text: string): number;
 }
