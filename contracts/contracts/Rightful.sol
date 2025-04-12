@@ -26,6 +26,7 @@ contract Rightful {
     );
 
     mapping(uint256 => Document[]) public documentMap;
+    uint256[] public documentHashes;
 
     function storeDocument(
         string memory _title,
@@ -49,6 +50,7 @@ contract Rightful {
         document.submissionTimestamp = block.timestamp;
         document.vector = _vector;
         documentMap[_documentHash].push(document);
+        documentHashes.push(_documentHash);
 
         emit DocumentCreated(_documentHash, _vector);
     }
