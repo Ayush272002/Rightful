@@ -14,7 +14,6 @@ import { ArrowRight, Upload, FileText, BarChart3, Link2 } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState, useRef } from 'react';
 import ChatWindow from '../components/custom/ChatWindow';
-import ChatIcon from '../components/custom/ChatIcon';
 
 // Constants for reusable values
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];

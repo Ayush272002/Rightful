@@ -1,5 +1,5 @@
-import { ethers } from "ethers";
-import { getContract } from "./rightful";
+import { ethers } from 'ethers';
+import { getContract } from './rightful';
 
 export async function storeDocument(data: {
   title: string;
@@ -14,8 +14,8 @@ export async function storeDocument(data: {
   const PRIVATE_KEY = process.env.PRIVATE_KEY;
   const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 
-  if (!PRIVATE_KEY) throw new Error("Private key is missing!");
-  if (!CONTRACT_ADDRESS) throw new Error("Contract address is missing!");
+  if (!PRIVATE_KEY) throw new Error('Private key is missing!');
+  if (!CONTRACT_ADDRESS) throw new Error('Contract address is missing!');
 
   const tokenCount = Math.round(data.tokenCount);
   const lexicalDensity = Math.round(data.lexicalDensity * 1000000);
@@ -24,7 +24,7 @@ export async function storeDocument(data: {
   const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID?.trim();
   const RPC_URL = INFURA_PROJECT_ID
     ? `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`
-    : "https://sepolia.drpc.org";
+    : 'https://sepolia.drpc.org';
 
   const provider = new ethers.JsonRpcProvider(RPC_URL);
 
@@ -44,6 +44,6 @@ export async function storeDocument(data: {
   );
 
   await tx.wait();
-  console.log("Document stored:", tx.hash);
+  console.log('Document stored:', tx.hash);
   return tx.hash;
 }

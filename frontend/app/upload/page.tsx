@@ -74,7 +74,7 @@ export default function Home() {
 
     try {
       await requestPayment();
-      const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
+      const response = await axios.post(`${API_BASE_URL}/broadcast`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // Set content type for file upload
         },
