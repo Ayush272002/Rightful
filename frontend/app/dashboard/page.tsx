@@ -68,7 +68,7 @@ export default function Dashboard() {
 
       <main className="py-16 bg-gray-50">
         <div className="container mx-auto">
-          {!useAccount ? (
+          {!isConnected ? (
             <div className="text-center py-16">
               <h2 className="heading-medium mb-4 text-red-600">
                 Please connect your wallet to access your dashboard
