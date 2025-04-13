@@ -159,7 +159,7 @@ export default function Home() {
       </section>
 
       {/* Process explanation section */}
-      <section className="py-16 bg-background">
+      <section id="how-it-works" className="py-16 bg-background">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="heading-medium mb-4">How Rightful Works</h2>
