@@ -22,6 +22,7 @@ import {
 import { Header } from '@/components/custom';
 import { DocumentProcessor } from '@/components/custom';
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import Agent from '@/components/custom/Agent';
 import { useRouter } from 'next/navigation';
@@ -543,10 +544,12 @@ export default function Dashboard() {
                 <p className="text-muted-foreground">
                   Please register documents to view them here
                 </p>
-                <Button className="mt-4 gap-2" onClick={handleFileSelect}>
-                  <Upload className="w-4 h-4" />
-                  Upload a document
-                </Button>
+                <Link href="/uploads">
+                  <Button className="mt-4 gap-2">
+                    <Upload className="w-4 h-4" />
+                    Upload a document
+                  </Button>
+                </Link>
               </div>
             </div>
           )}
