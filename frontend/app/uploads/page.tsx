@@ -145,9 +145,9 @@ export default function UploadsPage() {
             onDrop={handleDrop}
             onClick={handleFileSelect}
           >
-            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6 relative">
+            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6 relative mx-auto">
               <Upload className="w-8 h-8 text-accent" />
-              <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
+              <Sparkles className="w-4 h-4 text-accent absolute -top-1 left-1/2 -translate-x-1/2 animate-pulse" />
             </div>
             <h3 className="heading-medium mb-2">
               Upload Document for Analysis
