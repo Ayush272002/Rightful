@@ -13,12 +13,13 @@ import {
   Loader2,
   CheckCircle2,
   Bot,
-  Database,
+  Link,
   Sparkles,
   Zap,
   Brain,
   BookOpen,
   Hash,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -67,6 +68,14 @@ const PROCESSING_AGENTS = [
     particles: 5,
   },
   {
+    id: 'description',
+    name: 'Description Generator',
+    icon: FileText,
+    description: 'Generating a concise description of the document content',
+    color: 'pink',
+    particles: 5,
+  },
+  {
     id: 'embedding',
     name: 'Embedding Generator',
     icon: Brain,
@@ -77,7 +86,7 @@ const PROCESSING_AGENTS = [
   {
     id: 'verification',
     name: 'Verification Agent',
-    icon: Database,
+    icon: Link,
     description: 'Verifying document authenticity on the blockchain',
     color: 'amber',
     particles: 4,
@@ -200,19 +209,9 @@ const AgentCard = ({
         )}
       </div>
 
-      {/* Stage progress indicator */}
-      {isActive && (
-        <div className="w-full bg-muted/50 rounded-full h-1 overflow-hidden mb-2">
-          <div
-            className={`bg-${agent.color}-500 h-1 rounded-full transition-all duration-300`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-
       {/* Result display */}
       {isCompleted && result && (
-        <div className="mt-2 p-2 bg-muted/30 rounded text-xs font-mono">
+        <div className="mt-2 text-sm">
           {agent.id === 'token' && (
             <div className="flex justify-between">
               <span>Token Count:</span>
@@ -235,12 +234,18 @@ const AgentCard = ({
               </span>
             </div>
           )}
-          {agent.id === 'embedding' && (
-            <div className="flex justify-between">
-              <span>Embedding Generated:</span>
-              <span className="font-bold">✓</span>
-            </div>
-          )}
+        </div>
+      )}
+
+      {/* Progress bar */}
+      {(isActive || isCompleted) && (
+        <div className="w-full bg-muted rounded-full h-1 mt-3">
+          <div
+            className={`h-1 rounded-full transition-all duration-300 ${
+              isCompleted ? 'bg-emerald-500' : `bg-${agent.color}-500`
+            }`}
+            style={{ width: `${progress}%` }}
+          />
         </div>
       )}
     </div>
@@ -559,7 +564,13 @@ export default function DocumentProcessor({
 
   const simulateAgentProcessing = (result: any) => {
     // Start with upload agent
-    const agents = ['token', 'readability', 'embedding', 'verification'];
+    const agents = [
+      'token',
+      'readability',
+      'description',
+      'embedding',
+      'verification',
+    ];
     const intervals: Record<string, NodeJS.Timeout> = {};
 
     // Randomly activate agents with delays
@@ -592,6 +603,14 @@ export default function DocumentProcessor({
                   ...prev,
                   readability: {
                     readability: result?.readability || 0,
+                  },
+                }));
+              } else if (agentId === 'description') {
+                setAgentResults((prev) => ({
+                  ...prev,
+                  description: {
+                    description:
+                      result?.description || 'No description available',
                   },
                 }));
               } else if (agentId === 'embedding') {
@@ -746,7 +765,7 @@ export default function DocumentProcessor({
           <div className="flex flex-col h-full">
             <div className="text-center mb-8">
               <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
-                <Database className="w-8 h-8 text-accent animate-float" />
+                <Link className="w-8 h-8 text-accent animate-float" />
                 <div
                   className="absolute inset-0 rounded-full border-2 border-accent/20 border-t-accent animate-spin"
                   style={{ animationDuration: '2s' }}
@@ -778,7 +797,7 @@ export default function DocumentProcessor({
                         <Skeleton className="h-4 w-[120px]" />
                       </div>
                       <div className="flex items-center">
-                        <Database className="w-4 h-4 mr-1 text-accent/50" />
+                        <Link className="w-4 h-4 mr-1 text-accent/50" />
                         <Skeleton className="h-4 w-[80px]" />
                       </div>
                     </div>
@@ -794,7 +813,7 @@ export default function DocumentProcessor({
           <div className="flex flex-col h-full">
             <div className="text-center mb-8">
               <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
-                <Database className="w-8 h-8 text-accent" />
+                <Link className="w-8 h-8 text-accent" />
                 <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
               </div>
               <h3 className="text-xl font-medium mb-2">
@@ -840,7 +859,7 @@ export default function DocumentProcessor({
                                 </code>
                               </div>
                               <div className="flex items-center">
-                                <Database className="w-4 h-4 mr-1 text-accent" />
+                                <Link className="w-4 h-4 mr-1 text-accent" />
                                 <span className="text-secondary">Tokens:</span>
                                 <span className="ml-1 font-medium">
                                   {metadata.tokenCount}

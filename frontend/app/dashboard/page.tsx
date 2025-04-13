@@ -154,6 +154,11 @@ export default function Dashboard() {
                   click to browse. We&apos;ll analyse it for similarity with
                   existing documents on the blockchain.
                 </p>
+
+                <p className="text-secondary mb-8 max-w-md text-xs left-align">
+                  Only upload non-private, non-sensitive content you have the
+                  right to use
+                </p>
                 <Button size="lg" className="gap-2" onClick={handleFileSelect}>
                   Choose File
                 </Button>

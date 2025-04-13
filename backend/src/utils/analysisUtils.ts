@@ -6,12 +6,15 @@
 import { createHash } from "./miscUtils";
 import { extractPDFText } from "./pdfUtils";
 import { generateDocumentVector } from "./vectorUtils";
+import { generateTextWithContext } from "./llmUtils";
+import { DOCUMENT_DESCRIPTION_GENERATOR_INSTRUCTIONS } from "./agentInstructions";
 
 /**
  * Interface for document processing results
  */
 export interface DocumentProcessingResult extends TextAnalysis {
   documentHash: string;
+  description?: string;
 }
 
 /**
@@ -102,7 +105,7 @@ export async function analyseText(text: string): Promise<TextAnalysis> {
  *
  * @param buffer - Buffer containing document data
  * @param mimeType - MIME type of the document
- * @returns Text statistics, embedding, and content hash
+ * @returns Text statistics, embedding, content hash, and description
  */
 export async function processDocument(
   buffer: Buffer,
@@ -125,9 +128,33 @@ export async function processDocument(
     // Get the hash of the document content
     const documentHash = createHash(buffer.toString("utf-8"), 64);
 
+    // Generate document description
+    let description: string | undefined;
+    try {
+      const response = await generateTextWithContext(
+        DOCUMENT_DESCRIPTION_GENERATOR_INSTRUCTIONS,
+        JSON.stringify({
+          document_text: text,
+        })
+      );
+
+      if (response) {
+        const cleanedResponse = response
+          .trim()
+          .replace(/^```(?:json)?/, "")
+          .replace(/```$/, "");
+        // Parse the response to get the description
+        const parsedResponse = JSON.parse(cleanedResponse);
+        description = parsedResponse.description;
+      }
+    } catch (error) {
+      console.error("Failed to generate document description:", error);
+    }
+
     return {
       ...analysis,
       documentHash,
+      description,
     };
   } catch (error) {
     console.error("Document processing error:", error);
