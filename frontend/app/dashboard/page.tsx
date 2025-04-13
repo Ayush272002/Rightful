@@ -7,8 +7,17 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Upload, FileText, Bell, ArrowRight, ExternalLink,
-  X, AlertCircle, Link2, ChevronRight, ChevronLeft, BarChart3
+  Upload,
+  FileText,
+  Bell,
+  ArrowRight,
+  ExternalLink,
+  X,
+  AlertCircle,
+  Link2,
+  ChevronRight,
+  ChevronLeft,
+  BarChart3,
 } from 'lucide-react';
 import { Header } from '@/components/custom';
 import { DocumentProcessor } from '@/components/custom';
@@ -32,7 +41,7 @@ export default function Dashboard() {
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
   const [documentDetails, setDocumentDetails] = useState<any>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
-  
+
   const documentsScrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -44,10 +53,10 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       setIsLoading(true);
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
       // Mock API response with global stats and document list
       const mockApiResponse = {
         globalStats: {
@@ -58,62 +67,102 @@ export default function Dashboard() {
         activityData: {
           timeframe: 'weekly',
           data: [
-            { value: 35, verifications: 8, registrations: 27, date: '2025-04-07' },
-            { value: 62, verifications: 14, registrations: 48, date: '2025-04-08' },
-            { value: 47, verifications: 11, registrations: 36, date: '2025-04-09' },
-            { value: 73, verifications: 21, registrations: 52, date: '2025-04-10' },
-            { value: 58, verifications: 17, registrations: 41, date: '2025-04-11' },
-            { value: 39, verifications: 12, registrations: 27, date: '2025-04-12' },
-            { value: 85, verifications: 29, registrations: 56, date: '2025-04-13' }
+            {
+              value: 35,
+              verifications: 8,
+              registrations: 27,
+              date: '2025-04-07',
+            },
+            {
+              value: 62,
+              verifications: 14,
+              registrations: 48,
+              date: '2025-04-08',
+            },
+            {
+              value: 47,
+              verifications: 11,
+              registrations: 36,
+              date: '2025-04-09',
+            },
+            {
+              value: 73,
+              verifications: 21,
+              registrations: 52,
+              date: '2025-04-10',
+            },
+            {
+              value: 58,
+              verifications: 17,
+              registrations: 41,
+              date: '2025-04-11',
+            },
+            {
+              value: 39,
+              verifications: 12,
+              registrations: 27,
+              date: '2025-04-12',
+            },
+            {
+              value: 85,
+              verifications: 29,
+              registrations: 56,
+              date: '2025-04-13',
+            },
           ],
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         },
         documents: [
           {
             id: 'doc-1',
             title: 'Research Paper on AI Ethics',
-            description: 'An exploration of ethical considerations in artificial intelligence development and deployment.',
+            description:
+              'An exploration of ethical considerations in artificial intelligence development and deployment.',
             dateAdded: '2025-03-15T10:30:00Z',
-            url: 'https://blockchain.example.com/doc/1234567'
+            url: 'https://blockchain.example.com/doc/1234567',
           },
           {
             id: 'doc-2',
             title: 'Novel: The Digital Horizon',
-            description: 'A science fiction story set in a world where digital and physical realities have merged.',
+            description:
+              'A science fiction story set in a world where digital and physical realities have merged.',
             dateAdded: '2025-03-10T14:22:00Z',
-            url: 'https://blockchain.example.com/doc/7654321'
+            url: 'https://blockchain.example.com/doc/7654321',
           },
           {
             id: 'doc-3',
             title: 'Blockchain Technology Whitepaper',
-            description: 'Technical overview of a new blockchain protocol for intellectual property tracking.',
+            description:
+              'Technical overview of a new blockchain protocol for intellectual property tracking.',
             dateAdded: '2025-02-28T09:15:00Z',
-            url: 'https://blockchain.example.com/doc/9876543'
+            url: 'https://blockchain.example.com/doc/9876543',
           },
           {
             id: 'doc-4',
             title: 'Neural Networks: A Primer',
-            description: 'Introduction to the fundamentals of neural networks and their applications in modern AI systems.',
+            description:
+              'Introduction to the fundamentals of neural networks and their applications in modern AI systems.',
             dateAdded: '2025-03-05T16:42:00Z',
-            url: 'https://blockchain.example.com/doc/2468013'
+            url: 'https://blockchain.example.com/doc/2468013',
           },
           {
             id: 'doc-5',
             title: 'Cryptocurrency Market Analysis',
-            description: 'In-depth analysis of cryptocurrency trends and market predictions for the next decade.',
+            description:
+              'In-depth analysis of cryptocurrency trends and market predictions for the next decade.',
             dateAdded: '2025-03-01T11:20:00Z',
-            url: 'https://blockchain.example.com/doc/1357924'
-          }
-        ]
+            url: 'https://blockchain.example.com/doc/1357924',
+          },
+        ],
       };
-      
+
       // Update state with "fetched" data
       setDashboardStats(mockApiResponse);
       setIsLoading(false);
-      
+
       toast.success('Dashboard updated with latest data');
     };
-    
+
     if (isMounted) {
       fetchDashboardStats();
     }
@@ -123,27 +172,33 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDocumentDetails = async (docId: string) => {
       setIsLoadingDetails(true);
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       // Mock API response with document-specific stats
       const mockDocumentResponse = {
         id: docId,
-        title: dashboardStats?.documents.find((doc: any) => doc.id === docId)?.title,
-        description: dashboardStats?.documents.find((doc: any) => doc.id === docId)?.description,
-        url: dashboardStats?.documents.find((doc: any) => doc.id === docId)?.url,
-        dateAdded: dashboardStats?.documents.find((doc: any) => doc.id === docId)?.dateAdded,
+        title: dashboardStats?.documents.find((doc: any) => doc.id === docId)
+          ?.title,
+        description: dashboardStats?.documents.find(
+          (doc: any) => doc.id === docId
+        )?.description,
+        url: dashboardStats?.documents.find((doc: any) => doc.id === docId)
+          ?.url,
+        dateAdded: dashboardStats?.documents.find(
+          (doc: any) => doc.id === docId
+        )?.dateAdded,
         stats: {
           averageSimilarity: Math.floor(Math.random() * 30) + 70, // Random 70-99%
-          infringements: Math.floor(Math.random() * 3) // Random 0-2
-        }
+          infringements: Math.floor(Math.random() * 3), // Random 0-2
+        },
       };
-      
+
       setDocumentDetails(mockDocumentResponse);
       setIsLoadingDetails(false);
     };
-    
+
     if (selectedDocument && dashboardStats) {
       fetchDocumentDetails(selectedDocument);
     } else {
@@ -152,16 +207,22 @@ export default function Dashboard() {
   }, [selectedDocument, dashboardStats]);
 
   const handleDocumentClick = (docId: string) => {
-    setSelectedDocument(prevId => prevId === docId ? null : docId);
+    setSelectedDocument((prevId) => (prevId === docId ? null : docId));
   };
 
   const scrollDocuments = (direction: 'left' | 'right') => {
     if (documentsScrollRef.current) {
       const scrollAmount = 300;
       if (direction === 'left') {
-        documentsScrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        documentsScrollRef.current.scrollBy({
+          left: -scrollAmount,
+          behavior: 'smooth',
+        });
       } else {
-        documentsScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        documentsScrollRef.current.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth',
+        });
       }
     }
   };
@@ -170,8 +231,13 @@ export default function Dashboard() {
   const validateFile = (file: File): boolean => {
     setError(null);
     const fileExtension = file.name.split('.').pop()?.toUpperCase();
-    if (!fileExtension || !SUPPORTED_FILE_TYPES.includes(fileExtension as any)) {
-      setError(`Unsupported file type. Please use: ${SUPPORTED_FILE_TYPES.join(', ')}`);
+    if (
+      !fileExtension ||
+      !SUPPORTED_FILE_TYPES.includes(fileExtension as any)
+    ) {
+      setError(
+        `Unsupported file type. Please use: ${SUPPORTED_FILE_TYPES.join(', ')}`
+      );
       return false;
     }
     const maxSizeBytes = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -211,7 +277,9 @@ export default function Dashboard() {
   const handleFileSelect = (): void => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = SUPPORTED_FILE_TYPES.map(type => `.${type.toLowerCase()}`).join(',');
+    fileInput.accept = SUPPORTED_FILE_TYPES.map(
+      (type) => `.${type.toLowerCase()}`
+    ).join(',');
     fileInput.onchange = (e: Event) => {
       const target = e.target as HTMLInputElement;
       if (target.files?.length) {
@@ -242,27 +310,27 @@ export default function Dashboard() {
       uploadSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  
+
   const scrollToDocuments = () => {
     const documentsSection = document.querySelector('#documents-section');
     if (documentsSection) {
       documentsSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  
+
   // Add function to trigger the Agent chat
   const openAgentChat = () => {
     // Add a small delay to ensure DOM is ready
     setTimeout(() => {
       // More specific selector to find the Agent button
       const agentButton = document.querySelector('img[alt="AI Chat Bot"]');
-      
+
       if (agentButton) {
         console.log('Found Agent button, clicking it...');
         (agentButton as HTMLElement).click();
       } else {
         console.log('Agent button not found');
-        
+
         // Fallback: try finding by position
         const fixedButtons = document.querySelectorAll('.fixed');
         for (const btn of fixedButtons) {
@@ -289,12 +357,15 @@ export default function Dashboard() {
               <h1 className="text-2xl md:text-3xl font-bold mb-4">
                 Welcome back
               </h1>
-              
+
               {isLoading ? (
                 // Loading state for global stats
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[...Array(2)].map((_, i) => (
-                    <div key={i} className="card p-4 bg-white/80 backdrop-blur h-32 animate-pulse">
+                    <div
+                      key={i}
+                      className="card p-4 bg-white/80 backdrop-blur h-32 animate-pulse"
+                    >
                       <div className="h-4 bg-muted rounded w-24 mb-4"></div>
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-full bg-muted"></div>
@@ -310,26 +381,38 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Total Registered Works */}
                   <div className="card p-4 bg-white/80 backdrop-blur">
-                    <p className="text-sm text-muted-foreground">Total Registered</p>
+                    <p className="text-sm text-muted-foreground">
+                      Total Registered
+                    </p>
                     <div className="flex items-center justify-between">
-                      <p className="text-3xl font-bold">{dashboardStats?.globalStats.totalRegistered}</p>
+                      <p className="text-3xl font-bold">
+                        {dashboardStats?.globalStats.totalRegistered}
+                      </p>
                       <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
                         <FileText className="w-6 h-6 text-accent" />
                       </div>
                     </div>
                     <div className="mt-2 h-2 bg-accent/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-accent rounded-full" style={{ width: '70%' }}></div>
+                      <div
+                        className="h-full bg-accent rounded-full"
+                        style={{ width: '70%' }}
+                      ></div>
                     </div>
                   </div>
-                  
+
                   {/* New Works Added */}
                   <div className="card p-4 bg-white/80 backdrop-blur">
                     <p className="text-sm text-muted-foreground">New Works</p>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-3xl font-bold">+{dashboardStats?.globalStats.newWorks}</p>
+                        <p className="text-3xl font-bold">
+                          +{dashboardStats?.globalStats.newWorks}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          since {new Date(dashboardStats?.globalStats.lastCheckTimestamp).toLocaleDateString()}
+                          since{' '}
+                          {new Date(
+                            dashboardStats?.globalStats.lastCheckTimestamp
+                          ).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -340,50 +423,56 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            
+
             {/* Right half: AI Assistant/Chat */}
             <div className="bg-white/80 backdrop-blur rounded-lg border shadow-sm p-4 h-full min-h-[220px]">
               <div className="flex items-center gap-3 mb-4 border-b pb-3">
                 <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                  <img src="/AIHead.png" alt="AI Assistant" className="w-8 h-8" />
+                  <img
+                    src="/AIHead.png"
+                    alt="AI Assistant"
+                    className="w-8 h-8"
+                  />
                 </div>
                 <div>
                   <h3 className="font-medium">Rightful AI</h3>
-                  <p className="text-xs text-muted-foreground">What would you like to do today?</p>
+                  <p className="text-xs text-muted-foreground">
+                    What would you like to do today?
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex flex-col gap-2 py-3">
-                <Button 
-                  variant="outline" 
-                  className="justify-start" 
+                <Button
+                  variant="outline"
+                  className="justify-start"
                   onClick={scrollToUpload}
                 >
                   <Upload className="w-4 h-4 mr-2" />
                   Register my work
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="justify-start" 
+
+                <Button
+                  variant="outline"
+                  className="justify-start"
                   onClick={() => router.push('/uploads')}
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   Check my work for plagiarism
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="justify-start" 
+
+                <Button
+                  variant="outline"
+                  className="justify-start"
                   onClick={scrollToDocuments}
                 >
-                  <BarChart3 className="w-4 h-4 mr-2" /> 
+                  <BarChart3 className="w-4 h-4 mr-2" />
                   View my current documents
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="justify-start" 
+
+                <Button
+                  variant="outline"
+                  className="justify-start"
                   onClick={openAgentChat}
                 >
                   <Bell className="w-4 h-4 mr-2" />
@@ -392,7 +481,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          
+
           {/* MOVED: Upload Document now at top where activity chart was */}
           <div id="upload-section" className="card p-6 mt-6">
             <div
@@ -411,7 +500,7 @@ export default function Dashboard() {
               </h3>
               <p className="text-secondary mb-8 max-w-md">
                 Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')}) or
-                click to browse. We'll analyse it for similarity with
+                click to browse. We&apos;ll analyse it for similarity with
                 existing documents on the blockchain.
               </p>
               <Button size="lg" className="gap-2" onClick={handleFileSelect}>
@@ -428,17 +517,17 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Your Documents</h2>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 w-8 p-0" 
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0"
                 onClick={() => scrollDocuments('left')}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="h-8 w-8 p-0"
                 onClick={() => scrollDocuments('right')}
               >
@@ -446,11 +535,14 @@ export default function Dashboard() {
               </Button>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="flex gap-4 overflow-x-auto pb-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="min-w-[280px] h-48 bg-white/80 backdrop-blur rounded-lg border animate-pulse">
+                <div
+                  key={i}
+                  className="min-w-[280px] h-48 bg-white/80 backdrop-blur rounded-lg border animate-pulse"
+                >
                   <div className="p-4 h-full">
                     <div className="h-6 bg-muted rounded w-3/4 mb-3"></div>
                     <div className="h-4 bg-muted rounded w-full mb-2"></div>
@@ -461,13 +553,13 @@ export default function Dashboard() {
               ))}
             </div>
           ) : dashboardStats?.documents?.length > 0 ? (
-            <div 
+            <div
               ref={documentsScrollRef}
               className="flex gap-4 overflow-x-auto pb-4 scroll-smooth"
               style={{ scrollbarWidth: 'thin' }}
             >
               {dashboardStats.documents.map((doc: any) => (
-                <div 
+                <div
                   key={doc.id}
                   className={`min-w-[280px] max-w-[280px] bg-white/80 backdrop-blur rounded-lg border shadow-sm cursor-pointer transition-all
                     ${selectedDocument === doc.id ? 'border-accent ring-1 ring-accent' : 'hover:border-accent/50'}`}
@@ -475,7 +567,9 @@ export default function Dashboard() {
                 >
                   <div className="p-4">
                     <h3 className="font-medium line-clamp-1">{doc.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{doc.description}</p>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
+                      {doc.description}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-3">
                       Added: {new Date(doc.dateAdded).toLocaleDateString()}
                     </p>
@@ -489,7 +583,9 @@ export default function Dashboard() {
                 <div className="w-16 h-16 mx-auto rounded-full bg-muted/30 flex items-center justify-center mb-4">
                   <FileText className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground">Please register documents to view them here</p>
+                <p className="text-muted-foreground">
+                  Please register documents to view them here
+                </p>
                 <Button className="mt-4 gap-2" onClick={handleFileSelect}>
                   <Upload className="w-4 h-4" />
                   Upload a document
@@ -527,80 +623,123 @@ export default function Dashboard() {
                 {/* Left half: Document details */}
                 <div className="bg-white/80 backdrop-blur rounded-lg border p-6">
                   <h2 className="text-xl font-bold mb-4">Document Details</h2>
-                  
+
                   <div className="space-y-4">
                     {/* Title box */}
                     <div className="border rounded-md p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Title</p>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Title
+                      </p>
                       <p className="font-medium">{documentDetails?.title}</p>
                     </div>
-                    
+
                     {/* Description box */}
                     <div className="border rounded-md p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Description</p>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Description
+                      </p>
                       <p>{documentDetails?.description}</p>
                     </div>
-                    
+
                     {/* URL box */}
                     <div className="border rounded-md p-4">
-                      <p className="text-sm text-muted-foreground mb-1">Blockchain URL</p>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Blockchain URL
+                      </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-ellipsis overflow-hidden">{documentDetails?.url}</p>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <p className="text-sm text-ellipsis overflow-hidden">
+                          {documentDetails?.url}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
                           <Link2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Right half: Document-specific stats */}
                 <div className="bg-white/80 backdrop-blur rounded-lg border p-6">
                   <h2 className="text-xl font-bold mb-4">Analysis Results</h2>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Average Similarity Score */}
                     <div className="card p-4 flex items-center gap-4 bg-gray-50">
                       <div className="relative w-16 h-16 flex-shrink-0">
                         <svg className="w-full h-full" viewBox="0 0 36 36">
-                          <circle cx="18" cy="18" r="16" fill="none" className="stroke-muted-foreground/20" strokeWidth="2"></circle>
-                          <circle 
-                            cx="18" cy="18" r="16" fill="none" 
-                            className="stroke-accent" strokeWidth="2"
-                            strokeDasharray={`${documentDetails?.stats.averageSimilarity} 100`} 
+                          <circle
+                            cx="18"
+                            cy="18"
+                            r="16"
+                            fill="none"
+                            className="stroke-muted-foreground/20"
+                            strokeWidth="2"
+                          ></circle>
+                          <circle
+                            cx="18"
+                            cy="18"
+                            r="16"
+                            fill="none"
+                            className="stroke-accent"
+                            strokeWidth="2"
+                            strokeDasharray={`${documentDetails?.stats.averageSimilarity} 100`}
                             strokeLinecap="round"
                             transform="rotate(-90 18 18)"
                           ></circle>
-                          <text x="18" y="20" textAnchor="middle" fontSize="10" fontWeight="bold" className="fill-foreground">
+                          <text
+                            x="18"
+                            y="20"
+                            textAnchor="middle"
+                            fontSize="10"
+                            fontWeight="bold"
+                            className="fill-foreground"
+                          >
                             {documentDetails?.stats.averageSimilarity}%
                           </text>
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Similarity Score</p>
-                        <p className="text-xl font-semibold">{documentDetails?.stats.averageSimilarity}% Original</p>
+                        <p className="text-sm text-muted-foreground">
+                          Similarity Score
+                        </p>
+                        <p className="text-xl font-semibold">
+                          {documentDetails?.stats.averageSimilarity}% Original
+                        </p>
                       </div>
                     </div>
-                    
+
                     {/* Infringements Detected */}
                     <div className="card p-4 bg-gray-50">
-                      <p className="text-sm text-muted-foreground">Possible Infringements</p>
+                      <p className="text-sm text-muted-foreground">
+                        Possible Infringements
+                      </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-3xl font-bold">{documentDetails?.stats.infringements}</p>
+                        <p className="text-3xl font-bold">
+                          {documentDetails?.stats.infringements}
+                        </p>
                         <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                           <AlertCircle className="w-6 h-6 text-red-600" />
                         </div>
                       </div>
                       {documentDetails?.stats.infringements > 0 ? (
-                        <Button variant="link" className="text-xs p-0 h-auto mt-2 text-red-600">
+                        <Button
+                          variant="link"
+                          className="text-xs p-0 h-auto mt-2 text-red-600"
+                        >
                           Review suspicious activities →
                         </Button>
                       ) : (
-                        <p className="text-xs text-green-600 mt-2">No issues detected</p>
+                        <p className="text-xs text-green-600 mt-2">
+                          No issues detected
+                        </p>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="mt-6">
                     <Button className="w-full">View Full Analysis</Button>
                   </div>
@@ -619,10 +758,16 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-medium">Recent Blockchain Activity</h3>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-8 bg-accent/10 text-accent">Weekly</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 bg-accent/10 text-accent"
+              >
+                Weekly
+              </Button>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="h-40 w-full animate-pulse bg-muted rounded"></div>
           ) : (
@@ -642,60 +787,74 @@ export default function Dashboard() {
                   <span>Registrations</span>
                 </div>
               </div>
-              
+
               <div className="h-40 w-full relative mt-1">
                 {/* Chart container with bottom padding for x-axis */}
-                <div className="absolute inset-0 flex items-end px-4" style={{ bottom: '20px', height: 'calc(100% - 20px)' }}>
-                  {dashboardStats?.activityData.data.map((item: any, i: number) => {
-                    // Scale the height properly with adjusted container size
-                    const containerHeight = 140; // 160px - 20px for bottom padding
-                    const heightScale = 0.9; // Use 90% of the container height to leave room for labels
-                    const scaledHeight = (item.value / 100) * containerHeight * heightScale;
-                    const verificationHeight = (item.verifications / item.value) * scaledHeight;
-                    const registrationHeight = (item.registrations / item.value) * scaledHeight;
-                    
-                    return (
-                      <div key={i} className="flex-1 mx-1 relative group">
-                        {/* Main bar with total value - updated color */}
-                        <div 
-                          className="w-full bg-slate-400/70 rounded-t relative"
-                          style={{ height: `${scaledHeight}px` }}
-                        >
-                          {/* Registration bar - updated color */}
-                          <div 
-                            className="absolute bottom-0 left-0 w-full bg-slate-300 rounded-b"
-                            style={{ height: `${registrationHeight}px` }}
-                          ></div>
-                          
-                          {/* Verification bar - using accent color */}
-                          <div 
-                            className="absolute bottom-0 left-0 w-full bg-accent"
-                            style={{ 
-                              height: `${verificationHeight}px`,
-                              bottom: `${registrationHeight}px`
-                            }}
-                          ></div>
+                <div
+                  className="absolute inset-0 flex items-end px-4"
+                  style={{ bottom: '20px', height: 'calc(100% - 20px)' }}
+                >
+                  {dashboardStats?.activityData.data.map(
+                    (item: any, i: number) => {
+                      // Scale the height properly with adjusted container size
+                      const containerHeight = 140; // 160px - 20px for bottom padding
+                      const heightScale = 0.9; // Use 90% of the container height to leave room for labels
+                      const scaledHeight =
+                        (item.value / 100) * containerHeight * heightScale;
+                      const verificationHeight =
+                        (item.verifications / item.value) * scaledHeight;
+                      const registrationHeight =
+                        (item.registrations / item.value) * scaledHeight;
+
+                      return (
+                        <div key={i} className="flex-1 mx-1 relative group">
+                          {/* Main bar with total value - updated color */}
+                          <div
+                            className="w-full bg-slate-400/70 rounded-t relative"
+                            style={{ height: `${scaledHeight}px` }}
+                          >
+                            {/* Registration bar - updated color */}
+                            <div
+                              className="absolute bottom-0 left-0 w-full bg-slate-300 rounded-b"
+                              style={{ height: `${registrationHeight}px` }}
+                            ></div>
+
+                            {/* Verification bar - using accent color */}
+                            <div
+                              className="absolute bottom-0 left-0 w-full bg-accent"
+                              style={{
+                                height: `${verificationHeight}px`,
+                                bottom: `${registrationHeight}px`,
+                              }}
+                            ></div>
+                          </div>
+
+                          {/* Tooltip on hover */}
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-foreground text-background text-xs rounded p-1 whitespace-nowrap z-10">
+                            <div>
+                              Date: {new Date(item.date).toLocaleDateString()}
+                            </div>
+                            <div>Total: {item.value}</div>
+                            <div>Verifications: {item.verifications}</div>
+                            <div>Registrations: {item.registrations}</div>
+                          </div>
                         </div>
-                        
-                        {/* Tooltip on hover */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-foreground text-background text-xs rounded p-1 whitespace-nowrap z-10">
-                          <div>Date: {new Date(item.date).toLocaleDateString()}</div>
-                          <div>Total: {item.value}</div>
-                          <div>Verifications: {item.verifications}</div>
-                          <div>Registrations: {item.registrations}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    }
+                  )}
                 </div>
-                
+
                 {/* Date labels - positioned at the bottom of the chart */}
                 <div className="absolute bottom-0 w-full border-t border-muted pt-1 flex justify-between px-4">
-                  {dashboardStats?.activityData.labels.map((day: string, i: number) => (
-                    <span key={i} className="text-xs text-muted-foreground">{day}</span>
-                  ))}
+                  {dashboardStats?.activityData.labels.map(
+                    (day: string, i: number) => (
+                      <span key={i} className="text-xs text-muted-foreground">
+                        {day}
+                      </span>
+                    )
+                  )}
                 </div>
-                
+
                 {/* Y-axis labels */}
                 <div className="absolute left-0 top-0 h-full flex flex-col justify-between items-start text-xs text-muted-foreground pr-1">
                   <span>100</span>
@@ -707,14 +866,16 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-          
+
           {/* Insight summary */}
           <div className="text-sm mt-4 pt-3 border-t">
             <p className="text-muted-foreground">
-              <span className="text-foreground font-medium">Activity summary:</span> 
-              {' '}
-              Most active day was Sunday with 85 transactions. You've seen a 
-              <span className="text-accent"> 34% increase</span> in verification requests this week.
+              <span className="text-foreground font-medium">
+                Activity summary:
+              </span>{' '}
+              Most active day was Sunday with 85 transactions. You&apos;ve seen
+              a<span className="text-accent"> 34% increase</span> in
+              verification requests this week.
             </p>
           </div>
         </div>
