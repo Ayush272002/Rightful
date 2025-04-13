@@ -186,6 +186,25 @@
     "inputs": [
       {
         "internalType": "string",
+        "name": "_documentHash",
+        "type": "string"
+      }
+    ],
+    "name": "getNumberOfEntries",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "number",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
         "name": "_title",
         "type": "string"
       },

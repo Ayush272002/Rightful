@@ -20,8 +20,12 @@ import {
   BookOpen,
   Hash,
   FileText,
+  ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BlockchainCTA } from './BlockchainCTA';
@@ -30,11 +34,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import axios from 'axios';
+import { ethers } from 'ethers';
+import PaymentABI from '../../ABI/Payment.json';
+import { useAccount } from 'wagmi';
 
 dotenv.config();
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const CONTRACT_ADDRESS_PAYMENT =
+  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_PAYMENT;
+const GOTO_DEPOSIT = process.env.NEXT_PUBLIC_GOTO_DEPOSIT;
 
 // Core configuration
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'] as const;
@@ -82,14 +93,6 @@ const PROCESSING_AGENTS = [
     description: 'Creating vector embeddings for semantic analysis',
     color: 'violet',
     particles: 6,
-  },
-  {
-    id: 'verification',
-    name: 'Verification Agent',
-    icon: Link,
-    description: 'Verifying document authenticity on the blockchain',
-    color: 'amber',
-    particles: 4,
   },
 ];
 
@@ -277,6 +280,23 @@ export default function DocumentProcessor({
   const [agentResults, setAgentResults] = useState<Record<string, any>>({});
   const [similarDocuments, setSimilarDocuments] = useState<any[]>([]);
   const [isLoadingSimilar, setIsLoadingSimilar] = useState<boolean>(false);
+  const [showBlockchainStage, setShowBlockchainStage] = useState(false);
+  const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { address, isConnected } = useAccount();
+
+  // Load data from localStorage when component mounts
+  useEffect(() => {
+    const currentData = localStorage.getItem('currentUploadData');
+    if (currentData) {
+      const data = JSON.parse(currentData);
+      if (data.description) {
+        setDescription(data.description);
+      }
+    }
+  }, []);
 
   // Function to update onBlockchain status in localStorage
   const updateBlockchainStatus = (documentHash: string) => {
@@ -669,6 +689,137 @@ export default function DocumentProcessor({
     input.click();
   };
 
+  const handleBlockchainSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS_PAYMENT!,
+        PaymentABI,
+        signer
+      );
+
+      try {
+        const tx = await contract.increaseDeposit({
+          value: ethers.parseEther(GOTO_DEPOSIT!),
+        });
+        await tx.wait();
+      } catch (error: any) {
+        // Handle MetaMask transaction rejection
+        if (
+          error.code === 4001 ||
+          error.message?.includes('denied transaction signature')
+        ) {
+          toast.error('Transaction Rejected', {
+            description:
+              'You have rejected the transaction. Please try again if you want to proceed.',
+            className: 'bg-background text-foreground border-border',
+          });
+          setIsLoading(false);
+          return;
+        }
+        throw error; // Re-throw other errors
+      }
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('url', url);
+      formData.append('description', description);
+      formData.append('publicKey', address!);
+      formData.append('fileName', title.toLowerCase().replace(/\s+/g, '-'));
+
+      if (analysisResult?.documentHash) {
+        formData.append('documentHash', analysisResult.documentHash);
+      }
+
+      // Add vector data if available
+      if (analysisResult?.embedding) {
+        const vector = Object.values(analysisResult.embedding).join(',');
+        formData.append('vector', vector);
+      }
+
+      // Add analysis metrics
+      if (analysisResult) {
+        formData.append(
+          'tokenCount',
+          analysisResult.tokenCount?.toString() || '0'
+        );
+        formData.append(
+          'lexicalDensity',
+          analysisResult.lexicalDensity?.toString() || '0'
+        );
+        formData.append(
+          'readability',
+          analysisResult.readability?.toString() || '0'
+        );
+      }
+
+      const response = await axios.post(`${BACKEND_URL}/broadcast`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Check for error in response
+      if (response.data.error) {
+        toast.error(response.data.error, {
+          description: response.data.message || 'An error occurred',
+          className: 'bg-background text-foreground border-border',
+        });
+        return;
+      }
+
+      // Generate a short ID for the upload
+      const shortId = Math.random().toString(36).substring(2, 8);
+      const uploadKey = `upload_${shortId}`;
+
+      // Store the upload data in localStorage
+      localStorage.setItem(
+        uploadKey,
+        JSON.stringify({
+          documentHash: response.data.documentHash,
+          documentHashIndex: response.data.documentHashIndex,
+          timestamp: new Date().toISOString(),
+          title,
+          url,
+          description,
+        })
+      );
+
+      toast.success('Document added to blockchain successfully', {
+        description: 'Your document has been securely stored on the blockchain',
+        className: 'bg-background text-foreground border-border',
+      });
+      setShowBlockchainStage(false);
+    } catch (error: any) {
+      console.error('Error:', error);
+
+      // Handle axios error response
+      if (error.response?.data) {
+        const { error: errorMessage, message, details } = error.response.data;
+        toast.error(errorMessage || 'Failed to add document to blockchain', {
+          description: message || 'Please try again later',
+          className: 'bg-background text-foreground border-border',
+        });
+      } else {
+        toast.error('Failed to add document to blockchain', {
+          description: error.message || 'Please try again later',
+          className: 'bg-background text-foreground border-border',
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isMounted) {
     return null;
   }
@@ -809,140 +960,213 @@ export default function DocumentProcessor({
         )}
 
         {/* Stage 3: Similar Documents Results */}
-        {!isProcessing && !isLoadingSimilar && analysisResult && (
-          <div className="flex flex-col h-full">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
-                <Link className="w-8 h-8 text-accent" />
-                <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
+        {!isProcessing &&
+          !isLoadingSimilar &&
+          analysisResult &&
+          !showBlockchainStage && (
+            <div className="flex flex-col h-full">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
+                  <Link className="w-8 h-8 text-accent" />
+                  <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
+                </div>
+                <h3 className="text-xl font-medium mb-2">
+                  {similarDocuments.length > 0
+                    ? 'Similar Documents Found'
+                    : 'No Similar Documents Found'}
+                </h3>
+                <p className="text-secondary mb-6">
+                  {similarDocuments.length > 0
+                    ? `We found ${similarDocuments.length} similar documents on the blockchain`
+                    : 'Your document appears to be unique on the blockchain'}
+                </p>
               </div>
-              <h3 className="text-xl font-medium mb-2">
-                {similarDocuments.length > 0
-                  ? 'Similar Documents Found'
-                  : 'No Similar Documents Found'}
-              </h3>
-              <p className="text-secondary mb-6">
-                {similarDocuments.length > 0
-                  ? `We found ${similarDocuments.length} similar documents on the blockchain`
-                  : 'Your document appears to be unique on the blockchain'}
-              </p>
-            </div>
 
-            {similarDocuments.length > 0 && (
-              <div className="flex-1 overflow-auto">
-                <div className="grid grid-cols-1 gap-4">
-                  {similarDocuments.map((doc, index) => {
-                    const metadata = JSON.parse(doc.metadata);
-                    return (
-                      <Popover key={index}>
-                        <PopoverTrigger asChild>
-                          <div className="bg-muted/30 p-4 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-medium">{metadata.title}</h4>
-                              <span className="text-xs text-secondary">
-                                {new Date(
-                                  metadata.submissionTimestamp
-                                ).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-sm text-secondary mb-2">
-                              {doc.description}
-                            </p>
-                            <div className="flex items-center gap-4 text-sm">
-                              <div className="flex items-center">
-                                <Hash className="w-4 h-4 mr-1 text-accent" />
-                                <span className="text-secondary">Hash:</span>
-                                <code className="ml-1 bg-muted px-2 py-0.5 rounded">
-                                  {doc.hash
-                                    ? doc.hash.slice(0, 8) + '...'
-                                    : 'N/A'}
-                                </code>
-                              </div>
-                              <div className="flex items-center">
-                                <Link className="w-4 h-4 mr-1 text-accent" />
-                                <span className="text-secondary">Tokens:</span>
-                                <span className="ml-1 font-medium">
-                                  {metadata.tokenCount}
+              {similarDocuments.length > 0 && (
+                <div className="flex-1 overflow-auto">
+                  <div className="grid grid-cols-1 gap-4">
+                    {similarDocuments.map((doc, index) => {
+                      const metadata = JSON.parse(doc.metadata);
+                      return (
+                        <Popover key={index}>
+                          <PopoverTrigger asChild>
+                            <div className="bg-muted/30 p-4 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium">
+                                  {metadata.title}
+                                </h4>
+                                <span className="text-xs text-secondary">
+                                  {new Date(
+                                    metadata.submissionTimestamp
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
-                            </div>
-                          </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[400px]">
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <h4 className="font-semibold text-lg">
-                                Document Details
-                              </h4>
-                              <p className="text-sm text-muted-foreground">
-                                This document is stored securely on the
-                                blockchain. Add your document to get detailed
-                                similarity insights and protection features.
+                              <p className="text-sm text-secondary mb-2">
+                                {doc.description}
                               </p>
-                            </div>
-                            <div className="space-y-2">
-                              <h5 className="font-medium">Similarity Score</h5>
-                              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-colors ${
-                                    doc.similarity >= 0.8
-                                      ? 'bg-red-600'
-                                      : doc.similarity >= 0.5
-                                        ? 'bg-amber-500'
-                                        : 'bg-emerald-600'
-                                  }`}
-                                  style={{ width: `${doc.similarity * 100}%` }}
-                                />
+                              <div className="flex items-center gap-4 text-sm">
+                                <div className="flex items-center">
+                                  <Hash className="w-4 h-4 mr-1 text-accent" />
+                                  <span className="text-secondary">Hash:</span>
+                                  <code className="ml-1 bg-muted px-2 py-0.5 rounded">
+                                    {doc.hash
+                                      ? doc.hash.slice(0, 8) + '...'
+                                      : 'N/A'}
+                                  </code>
+                                </div>
+                                <div className="flex items-center">
+                                  <Link className="w-4 h-4 mr-1 text-accent" />
+                                  <span className="text-secondary">
+                                    Tokens:
+                                  </span>
+                                  <span className="ml-1 font-medium">
+                                    {metadata.tokenCount}
+                                  </span>
+                                </div>
                               </div>
-                              <p
-                                className={`text-sm font-medium ${
-                                  doc.similarity >= 0.8
-                                    ? 'text-red-600'
-                                    : doc.similarity >= 0.5
-                                      ? 'text-amber-600'
-                                      : 'text-emerald-600'
-                                }`}
-                              >
-                                {(doc.similarity * 100).toFixed(1)}% similar
-                              </p>
                             </div>
-                            <div className="border-t pt-4">
-                              <p className="text-sm text-muted-foreground">
-                                Want to protect your document and get detailed
-                                insights?
-                              </p>
-                              <Button
-                                variant="outline"
-                                className="w-full mt-2"
-                                onClick={() => {
-                                  // Handle blockchain addition here
-                                }}
-                              >
-                                Add to Blockchain
-                              </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[400px]">
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-lg">
+                                  Document Details
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                  This document is stored securely on the
+                                  blockchain. Add your document to get detailed
+                                  similarity insights and protection features.
+                                </p>
+                              </div>
+                              <div className="space-y-2">
+                                <h5 className="font-medium">
+                                  Similarity Score
+                                </h5>
+                                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-colors ${
+                                      doc.similarity >= 0.8
+                                        ? 'bg-red-600'
+                                        : doc.similarity >= 0.5
+                                          ? 'bg-amber-500'
+                                          : 'bg-emerald-600'
+                                    }`}
+                                    style={{
+                                      width: `${doc.similarity * 100}%`,
+                                    }}
+                                  />
+                                </div>
+                                <p
+                                  className={`text-sm font-medium ${
+                                    doc.similarity >= 0.8
+                                      ? 'text-red-600'
+                                      : doc.similarity >= 0.5
+                                        ? 'text-amber-600'
+                                        : 'text-emerald-600'
+                                  }`}
+                                >
+                                  {(doc.similarity * 100).toFixed(1)}% similar
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    );
-                  })}
+                          </PopoverContent>
+                        </Popover>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <BlockchainCTA
+                className="mt-8"
+                documentHash={analysisResult.documentHash}
+                onAddToBlockchain={() => {
+                  setShowBlockchainStage(true);
+                  toast.success('Starting blockchain integration...', {
+                    description:
+                      'Your document will be securely added to the blockchain.',
+                  });
+                }}
+              />
+            </div>
+          )}
+
+        {/* Stage 4: Blockchain Upload */}
+        {!isProcessing &&
+          !isLoadingSimilar &&
+          analysisResult &&
+          showBlockchainStage && (
+            <div className="flex flex-col h-full">
+              <div className="flex items-center gap-4 mb-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowBlockchainStage(false)}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <div>
+                  <h3 className="text-xl font-medium">Add to Blockchain</h3>
                 </div>
               </div>
-            )}
 
-            {/* Add the BlockchainCTA component */}
-            <BlockchainCTA
-              className="mt-8"
-              onAddToBlockchain={() => {
-                // Handle blockchain addition here
-                toast.success('Starting blockchain integration...', {
-                  description:
-                    'Your document will be securely added to the blockchain.',
-                });
-              }}
-            />
-          </div>
-        )}
+              <form onSubmit={handleBlockchainSubmit} className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Enter title"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="url">URL *</Label>
+                    <Input
+                      id="url"
+                      type="url"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder="https://example.com"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      readOnly
+                      className="bg-muted/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={isLoading || !title || !url}
+                  >
+                    {isLoading
+                      ? 'Adding to Blockchain...'
+                      : 'Add to Blockchain'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowBlockchainStage(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
 
         {error && (
           <div className="text-center py-8">

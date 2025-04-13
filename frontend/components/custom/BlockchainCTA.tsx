@@ -15,6 +15,7 @@ import { Shield, Lock, Bell, Zap, ChevronRight } from 'lucide-react';
 interface BlockchainCTAProps {
   onAddToBlockchain?: () => void; // TODO: Add loading state and success feedback
   className?: string; // Additional styling classes
+  documentHash?: string;
 }
 
 const BLOCKCHAIN_BENEFITS = [
@@ -45,6 +46,7 @@ const BLOCKCHAIN_BENEFITS = [
 export function BlockchainCTA({
   onAddToBlockchain,
   className,
+  documentHash,
 }: BlockchainCTAProps): React.ReactNode {
   return (
     <div
@@ -95,7 +97,6 @@ export function BlockchainCTA({
                   );
                 })}
               </div>
-              {/* TODO: Add loading state and success feedback */}
               <Button
                 className="w-full mt-4"
                 size="lg"
