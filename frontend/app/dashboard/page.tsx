@@ -59,12 +59,13 @@ export default function Dashboard() {
       // Simulate API delay
       // await new Promise((resolve) => setTimeout(resolve, 1200));
 
-      let realDocumentsData = [];
+      const realDocumentsData = [];
       const docHashes = await getDocumentHashes();
       for (const hash of docHashes) {
         const docsByHash = await getDocumentsByHash(hash);
         let i = 0;
         for (const doc of docsByHash) {
+          console.log(doc);
           realDocumentsData.push({
             id: doc.documentHash + '-' + (i - 1),
             title: doc.title,
@@ -533,7 +534,7 @@ export default function Dashboard() {
                       {doc.description}
                     </p>
                     <p className="text-xs text-muted-foreground mt-3">
-                      Added: {new Date(doc.dateAdded).toLocaleDateString()}
+                      Added: {doc.dateAdded}
                     </p>
                   </div>
                 </div>
