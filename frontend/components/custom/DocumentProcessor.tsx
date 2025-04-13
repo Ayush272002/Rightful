@@ -655,7 +655,7 @@ export default function DocumentProcessor({
   }
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-0">
       {(() => {
         console.log('Main render state:', {
           isMounted,
@@ -668,7 +668,7 @@ export default function DocumentProcessor({
         });
         return null;
       })()}
-      <div className="card p-8 w-full h-full max-w-6xl mx-4 relative flex flex-col">
+      <div className="card w-full h-full max-w-full p-8 relative flex flex-col overflow-hidden">
         <Button
           variant="ghost"
           size="icon"
