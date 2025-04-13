@@ -19,9 +19,7 @@ import { useAccount } from 'wagmi';
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'How It Works', href: '/#how-it-works' }, // Changed to include root path
-  { label: 'Pricing', href: '#pricing' },
   { label: 'Documentation', href: '#docs' },
-  { label: 'Contact', href: '#contact' },
 ] as const;
 
 export function Header() {
