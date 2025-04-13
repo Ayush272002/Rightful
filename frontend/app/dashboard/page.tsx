@@ -26,7 +26,7 @@ import { toast } from 'sonner';
 import Agent from '@/components/custom/Agent';
 import { useRouter } from 'next/navigation';
 import { getDocumentHashes } from '@/utils/getDocumentHashes';
-import { getDocumentsByHash } from '@/utils/getDocument';
+import { getDocument, getDocumentsByHash } from '@/utils/getDocument';
 
 // Core configuration
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'] as const;
@@ -56,16 +56,21 @@ export default function Dashboard() {
     const fetchDashboardStats = async () => {
       setIsLoading(true);
 
-      // Simulate API delay
-      // await new Promise((resolve) => setTimeout(resolve, 1200));
-
+      // Get all localStorage keys that start with 'upload_'
+      const uploadKeys = Object.keys(localStorage).filter((key) =>
+        key.startsWith('upload_')
+      );
       const realDocumentsData = [];
-      const docHashes = await getDocumentHashes();
-      for (const hash of docHashes) {
-        const docsByHash = await getDocumentsByHash(hash);
-        let i = 0;
-        for (const doc of docsByHash) {
-          console.log(doc);
+
+      // Process each upload from localStorage
+      for (const key of uploadKeys) {
+        const uploadData = JSON.parse(localStorage.getItem(key) || '{}');
+        if (uploadData.documentHash) {
+          const doc = await getDocument(
+            uploadData.documentHash,
+            uploadData.documentHashIndex
+          );
+          let i = 0;
           realDocumentsData.push({
             id: doc.documentHash + '-' + (i - 1),
             title: doc.title,
@@ -74,22 +79,14 @@ export default function Dashboard() {
             url: doc.resourceLocation,
           });
           i += 1;
-          // {
-          //   id: 'doc-1',
-          //   title: 'Research Paper on AI Ethics',
-          //   description:
-          //     'An exploration of ethical considerations in artificial intelligence development and deployment.',
-          //   dateAdded: '2025-03-15T10:30:00Z',
-          //   url: 'https://blockchain.example.com/doc/1234567',
-          // }
         }
       }
 
       // Mock API response with global stats and document list
       const mockApiResponse = {
         globalStats: {
-          totalRegistered: 17,
-          newWorks: 3,
+          totalRegistered: realDocumentsData.length,
+          newWorks: realDocumentsData.length,
           lastCheckTimestamp: Date.now() - 172800000, // 2 days ago
         },
         activityData: {
@@ -142,9 +139,6 @@ export default function Dashboard() {
         },
         documents: realDocumentsData,
       };
-
-      mockApiResponse.globalStats.totalRegistered =
-        mockApiResponse.documents.length;
 
       // Update state with "fetched" data
       setDashboardStats(mockApiResponse);
