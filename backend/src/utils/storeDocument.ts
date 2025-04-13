@@ -53,5 +53,6 @@ export async function storeDocument(data: {
     " - Doc Hash ",
     data.documentHash
   );
-  return tx.hash;
+
+  return await contract.getNumberOfEntries(data.documentHash)-1;
 }

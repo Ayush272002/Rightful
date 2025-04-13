@@ -97,7 +97,7 @@ app.post(
       console.log(documentHash);
       console.log(analysisResult);
       console.log(Object.values(analysisResult.embedding).join(","));
-      await storeDocument({
+      let documentHashIndex = await storeDocument({
         title,
         description,
         resourceLocation: url,
@@ -107,7 +107,10 @@ app.post(
         audienceEngagement: analysisResult.readability,
         vector: Object.values(analysisResult.embedding).join(","),
       });
-      res.json(analysisResult);
+      res.json({
+        ...analysisResult,
+        documentHashIndex
+      });
     } catch (error) {
       if (req.file?.path) {
         try {
