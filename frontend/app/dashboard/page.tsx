@@ -8,13 +8,14 @@
 import { Button } from '@/components/ui/button';
 import {
   Upload, FileText, Bell, ArrowRight, ExternalLink,
-  X, AlertCircle, Link2, ChevronRight, ChevronLeft
+  X, AlertCircle, Link2, ChevronRight, ChevronLeft, BarChart3
 } from 'lucide-react';
 import { Header } from '@/components/custom';
 import { DocumentProcessor } from '@/components/custom';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import Agent from '@/components/custom/Agent';
+import { useRouter } from 'next/navigation';
 
 // Core configuration
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'] as const;
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
   
   const documentsScrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
@@ -55,7 +57,15 @@ export default function Dashboard() {
         },
         activityData: {
           timeframe: 'weekly',
-          data: [35, 45, 30, 65, 48, 72, 58],
+          data: [
+            { value: 35, verifications: 8, registrations: 27, date: '2025-04-07' },
+            { value: 62, verifications: 14, registrations: 48, date: '2025-04-08' },
+            { value: 47, verifications: 11, registrations: 36, date: '2025-04-09' },
+            { value: 73, verifications: 21, registrations: 52, date: '2025-04-10' },
+            { value: 58, verifications: 17, registrations: 41, date: '2025-04-11' },
+            { value: 39, verifications: 12, registrations: 27, date: '2025-04-12' },
+            { value: 85, verifications: 29, registrations: 56, date: '2025-04-13' }
+          ],
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         },
         documents: [
@@ -226,6 +236,46 @@ export default function Dashboard() {
     setError(null);
   };
 
+  const scrollToUpload = () => {
+    const uploadSection = document.querySelector('#upload-section');
+    if (uploadSection) {
+      uploadSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  const scrollToDocuments = () => {
+    const documentsSection = document.querySelector('#documents-section');
+    if (documentsSection) {
+      documentsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  // Add function to trigger the Agent chat
+  const openAgentChat = () => {
+    // Add a small delay to ensure DOM is ready
+    setTimeout(() => {
+      // More specific selector to find the Agent button
+      const agentButton = document.querySelector('img[alt="AI Chat Bot"]');
+      
+      if (agentButton) {
+        console.log('Found Agent button, clicking it...');
+        (agentButton as HTMLElement).click();
+      } else {
+        console.log('Agent button not found');
+        
+        // Fallback: try finding by position
+        const fixedButtons = document.querySelectorAll('.fixed');
+        for (const btn of fixedButtons) {
+          if (btn.querySelector('img')) {
+            console.log('Found potential agent button by position');
+            (btn as HTMLElement).click();
+            return;
+          }
+        }
+      }
+    }, 100);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {isMounted && <Header />}
@@ -298,29 +348,53 @@ export default function Dashboard() {
                   <img src="/AIHead.png" alt="AI Assistant" className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Rightful Assistant</h3>
-                  <p className="text-xs text-muted-foreground">Ask me about your intellectual property</p>
+                  <h3 className="font-medium">Rightful AI</h3>
+                  <p className="text-xs text-muted-foreground">What would you like to do today?</p>
                 </div>
               </div>
               
-              <div className="text-center py-6">
-                <p className="text-sm text-muted-foreground mb-4">How can I help you today?</p>
-                <Button className="gap-2" onClick={() => {
-                  // Trigger the Agent component
-                  const agentBtn = document.querySelector('.agent-trigger');
-                  if (agentBtn) {
-                    (agentBtn as HTMLElement).click();
-                  }
-                }}>
-                  <Bell className="w-4 h-4" />
-                  Start a conversation
+              <div className="flex flex-col gap-2 py-3">
+                <Button 
+                  variant="outline" 
+                  className="justify-start" 
+                  onClick={scrollToUpload}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Register my work
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start" 
+                  onClick={() => router.push('/uploads')}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Check my work for plagiarism
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start" 
+                  onClick={scrollToDocuments}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" /> 
+                  View my current documents
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="justify-start" 
+                  onClick={openAgentChat}
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  Ask me something else
                 </Button>
               </div>
             </div>
           </div>
           
           {/* MOVED: Upload Document now at top where activity chart was */}
-          <div className="card p-6 mt-6">
+          <div id="upload-section" className="card p-6 mt-6">
             <div
               className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors flex flex-col items-center justify-center ${
                 isDragging ? 'border-accent bg-accent/5' : 'border-border'
@@ -349,7 +423,7 @@ export default function Dashboard() {
       </section>
 
       {/* Document List Section */}
-      <section className="py-6 border-b">
+      <section id="documents-section" className="py-6 border-b">
         <div className="container">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Your Documents</h2>
@@ -540,38 +614,109 @@ export default function Dashboard() {
       {/* Main section at bottom - now has the activity chart */}
       <main className="flex-1 container py-8 relative">
         {/* MOVED: Activity Timeline to bottom where upload used to be */}
+        {/* Activity Timeline with Enhanced Data */}
         <div className="card p-4 bg-white/80 backdrop-blur">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium">Recent Activity</h3>
+            <h3 className="font-medium">Recent Blockchain Activity</h3>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-8">Daily</Button>
               <Button variant="outline" size="sm" className="h-8 bg-accent/10 text-accent">Weekly</Button>
-              <Button variant="outline" size="sm" className="h-8">Monthly</Button>
             </div>
           </div>
           
           {isLoading ? (
-            <div className="h-32 w-full animate-pulse bg-muted rounded"></div>
+            <div className="h-40 w-full animate-pulse bg-muted rounded"></div>
           ) : (
-            <div className="h-32 w-full relative">
-              <div className="absolute inset-0 flex items-end">
-                {dashboardStats?.activityData.data.map((height: number, i: number) => (
-                  <div key={i} className="flex-1 mx-1">
-                    <div 
-                      className="w-full bg-accent rounded-t"
-                      style={{ height: `${height}%` }}
-                    ></div>
-                  </div>
-                ))}
+            <div className="relative">
+              {/* Chart Legend - Updated Colors */}
+              <div className="flex items-center gap-4 mb-2 text-xs">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-slate-400 rounded-sm mr-1"></div>
+                  <span>Total Transactions</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-accent rounded-sm mr-1"></div>
+                  <span>Verifications</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-slate-300 rounded-sm mr-1"></div>
+                  <span>Registrations</span>
+                </div>
               </div>
               
-              <div className="absolute bottom-0 w-full border-t border-muted pt-1 flex justify-between">
-                {dashboardStats?.activityData.labels.map((day: string, i: number) => (
-                  <span key={i} className="text-xs text-muted-foreground">{day}</span>
-                ))}
+              <div className="h-40 w-full relative mt-1">
+                {/* Chart container with bottom padding for x-axis */}
+                <div className="absolute inset-0 flex items-end px-4" style={{ bottom: '20px', height: 'calc(100% - 20px)' }}>
+                  {dashboardStats?.activityData.data.map((item: any, i: number) => {
+                    // Scale the height properly with adjusted container size
+                    const containerHeight = 140; // 160px - 20px for bottom padding
+                    const heightScale = 0.9; // Use 90% of the container height to leave room for labels
+                    const scaledHeight = (item.value / 100) * containerHeight * heightScale;
+                    const verificationHeight = (item.verifications / item.value) * scaledHeight;
+                    const registrationHeight = (item.registrations / item.value) * scaledHeight;
+                    
+                    return (
+                      <div key={i} className="flex-1 mx-1 relative group">
+                        {/* Main bar with total value - updated color */}
+                        <div 
+                          className="w-full bg-slate-400/70 rounded-t relative"
+                          style={{ height: `${scaledHeight}px` }}
+                        >
+                          {/* Registration bar - updated color */}
+                          <div 
+                            className="absolute bottom-0 left-0 w-full bg-slate-300 rounded-b"
+                            style={{ height: `${registrationHeight}px` }}
+                          ></div>
+                          
+                          {/* Verification bar - using accent color */}
+                          <div 
+                            className="absolute bottom-0 left-0 w-full bg-accent"
+                            style={{ 
+                              height: `${verificationHeight}px`,
+                              bottom: `${registrationHeight}px`
+                            }}
+                          ></div>
+                        </div>
+                        
+                        {/* Tooltip on hover */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-foreground text-background text-xs rounded p-1 whitespace-nowrap z-10">
+                          <div>Date: {new Date(item.date).toLocaleDateString()}</div>
+                          <div>Total: {item.value}</div>
+                          <div>Verifications: {item.verifications}</div>
+                          <div>Registrations: {item.registrations}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Date labels - positioned at the bottom of the chart */}
+                <div className="absolute bottom-0 w-full border-t border-muted pt-1 flex justify-between px-4">
+                  {dashboardStats?.activityData.labels.map((day: string, i: number) => (
+                    <span key={i} className="text-xs text-muted-foreground">{day}</span>
+                  ))}
+                </div>
+                
+                {/* Y-axis labels */}
+                <div className="absolute left-0 top-0 h-full flex flex-col justify-between items-start text-xs text-muted-foreground pr-1">
+                  <span>100</span>
+                  <span>75</span>
+                  <span>50</span>
+                  <span>25</span>
+                  <span>0</span>
+                </div>
               </div>
             </div>
           )}
+          
+          {/* Insight summary */}
+          <div className="text-sm mt-4 pt-3 border-t">
+            <p className="text-muted-foreground">
+              <span className="text-foreground font-medium">Activity summary:</span> 
+              {' '}
+              Most active day was Sunday with 85 transactions. You've seen a 
+              <span className="text-accent"> 34% increase</span> in verification requests this week.
+            </p>
+          </div>
         </div>
 
         {/* Document Processor Modal */}
@@ -609,8 +754,8 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* AI Assistant (hidden but functional) */}
-      <div className="hidden">
+      {/* AI Assistant*/}
+      <div>
         <Agent pageName={'dashboard'} details={'top level'} />
       </div>
     </div>
