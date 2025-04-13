@@ -22,6 +22,13 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { BlockchainCTA } from './BlockchainCTA';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 dotenv.config();
 
@@ -335,10 +342,17 @@ export default function DocumentProcessor({
 
       setAnalysisResult(finalResult);
 
-      // Fetch similar documents from backend
+      // Clean up intervals and finish processing stage
+      cleanupAgents();
+      setIsProcessing(false);
+
+      // Start similar documents search stage
       setIsLoadingSimilar(true);
       try {
-        const vector = Object.values(finalResult.embedding).join(',');
+        console.log('Embedding data:', finalResult.embedding);
+        const vector = Object.values(finalResult.embedding || {}).join(',');
+        console.log('Vector for similarity search:', vector);
+
         const similarResponse = await fetch(
           `${BACKEND_URL}/similar-documents?vector=${vector}`
         );
@@ -348,7 +362,13 @@ export default function DocumentProcessor({
         }
 
         const similarDocs = await similarResponse.json();
+        console.log('Similar documents received:', similarDocs);
         setSimilarDocuments(similarDocs);
+        console.log(
+          'Similar documents state set:',
+          similarDocs.length,
+          'items'
+        );
       } catch (err) {
         console.error('Error fetching similar documents:', err);
         toast.error('Unable to fetch similar documents', {
@@ -358,6 +378,7 @@ export default function DocumentProcessor({
         });
       } finally {
         setIsLoadingSimilar(false);
+        console.log('isLoadingSimilar set to false');
       }
 
       // Call onComplete callback if provided
@@ -367,9 +388,6 @@ export default function DocumentProcessor({
 
       // Update toast to success
       toast.dismiss(processingToast);
-
-      // Clean up intervals
-      cleanupAgents();
     } catch (err) {
       console.error('Upload error:', err);
       const errorMessage =
@@ -384,7 +402,6 @@ export default function DocumentProcessor({
       });
     } finally {
       clearInterval(uploadInterval);
-      setIsProcessing(false);
     }
   }
 
@@ -639,6 +656,18 @@ export default function DocumentProcessor({
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+      {(() => {
+        console.log('Main render state:', {
+          isMounted,
+          isProcessing,
+          hasError: !!error,
+          hasAnalysisResult: !!analysisResult,
+          uploadProgress,
+          isLoadingSimilar,
+          similarDocumentsCount: similarDocuments.length,
+        });
+        return null;
+      })()}
       <div className="card p-8 w-full h-full max-w-6xl mx-4 relative flex flex-col">
         <Button
           variant="ghost"
@@ -649,6 +678,7 @@ export default function DocumentProcessor({
           <X className="w-4 h-4" />
         </Button>
 
+        {/* Stage 1: Initial Processing */}
         {isProcessing && (
           <div className="flex flex-col h-full">
             <div className="text-center mb-8">
@@ -711,6 +741,184 @@ export default function DocumentProcessor({
           </div>
         )}
 
+        {/* Stage 2: Searching Similar Documents */}
+        {!isProcessing && isLoadingSimilar && (
+          <div className="flex flex-col h-full">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
+                <Database className="w-8 h-8 text-accent animate-float" />
+                <div
+                  className="absolute inset-0 rounded-full border-2 border-accent/20 border-t-accent animate-spin"
+                  style={{ animationDuration: '2s' }}
+                />
+                <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
+              </div>
+              <h3 className="text-xl font-medium mb-2">
+                Searching Similar Documents
+              </h3>
+              <p className="text-secondary mb-6">
+                Comparing your document with others on the blockchain
+              </p>
+            </div>
+
+            {/* Skeleton loading state */}
+            <div className="flex-1 overflow-auto">
+              <div className="grid grid-cols-1 gap-4">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="bg-muted/30 p-4 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Skeleton className="h-6 w-[200px]" />
+                      <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-[80%] mb-4" />
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center">
+                        <Hash className="w-4 h-4 mr-1 text-accent/50" />
+                        <Skeleton className="h-4 w-[120px]" />
+                      </div>
+                      <div className="flex items-center">
+                        <Database className="w-4 h-4 mr-1 text-accent/50" />
+                        <Skeleton className="h-4 w-[80px]" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Stage 3: Similar Documents Results */}
+        {!isProcessing && !isLoadingSimilar && analysisResult && (
+          <div className="flex flex-col h-full">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
+                <Database className="w-8 h-8 text-accent" />
+                <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
+              </div>
+              <h3 className="text-xl font-medium mb-2">
+                {similarDocuments.length > 0
+                  ? 'Similar Documents Found'
+                  : 'No Similar Documents Found'}
+              </h3>
+              <p className="text-secondary mb-6">
+                {similarDocuments.length > 0
+                  ? `We found ${similarDocuments.length} similar documents on the blockchain`
+                  : 'Your document appears to be unique on the blockchain'}
+              </p>
+            </div>
+
+            {similarDocuments.length > 0 && (
+              <div className="flex-1 overflow-auto">
+                <div className="grid grid-cols-1 gap-4">
+                  {similarDocuments.map((doc, index) => {
+                    const metadata = JSON.parse(doc.metadata);
+                    return (
+                      <Popover key={index}>
+                        <PopoverTrigger asChild>
+                          <div className="bg-muted/30 p-4 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-medium">{metadata.title}</h4>
+                              <span className="text-xs text-secondary">
+                                {new Date(
+                                  metadata.submissionTimestamp
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-sm text-secondary mb-2">
+                              {doc.description}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center">
+                                <Hash className="w-4 h-4 mr-1 text-accent" />
+                                <span className="text-secondary">Hash:</span>
+                                <code className="ml-1 bg-muted px-2 py-0.5 rounded">
+                                  {doc.hash
+                                    ? doc.hash.slice(0, 8) + '...'
+                                    : 'N/A'}
+                                </code>
+                              </div>
+                              <div className="flex items-center">
+                                <Database className="w-4 h-4 mr-1 text-accent" />
+                                <span className="text-secondary">Tokens:</span>
+                                <span className="ml-1 font-medium">
+                                  {metadata.tokenCount}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[400px]">
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-lg">
+                                Document Details
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                This document is stored securely on the
+                                blockchain. Add your document to get detailed
+                                similarity insights and protection features.
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <h5 className="font-medium">Similarity Score</h5>
+                              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-colors ${
+                                    doc.similarity >= 0.8
+                                      ? 'bg-red-600'
+                                      : doc.similarity >= 0.5
+                                        ? 'bg-amber-500'
+                                        : 'bg-emerald-600'
+                                  }`}
+                                  style={{ width: `${doc.similarity * 100}%` }}
+                                />
+                              </div>
+                              <p
+                                className={`text-sm font-medium ${
+                                  doc.similarity >= 0.8
+                                    ? 'text-red-600'
+                                    : doc.similarity >= 0.5
+                                      ? 'text-amber-600'
+                                      : 'text-emerald-600'
+                                }`}
+                              >
+                                {(doc.similarity * 100).toFixed(1)}% similar
+                              </p>
+                            </div>
+                            <div className="border-t pt-4">
+                              <p className="text-sm text-muted-foreground">
+                                Want to protect your document and get detailed
+                                insights?
+                              </p>
+                              <Button variant="outline" className="w-full mt-2">
+                                Add Your Document to Blockchain
+                              </Button>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Add the BlockchainCTA component */}
+            <BlockchainCTA
+              className="mt-8"
+              onAddToBlockchain={() => {
+                // Handle blockchain addition here
+                toast.success('Starting blockchain integration...', {
+                  description:
+                    'Your document will be securely added to the blockchain.',
+                });
+              }}
+            />
+          </div>
+        )}
+
         {error && (
           <div className="text-center py-8">
             <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
@@ -723,140 +931,7 @@ export default function DocumentProcessor({
           </div>
         )}
 
-        {analysisResult && !isProcessing && !error && (
-          <div className="space-y-6 flex-1 overflow-auto">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6 relative">
-                <svg
-                  className="w-8 h-8 text-emerald-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <div className="absolute inset-0 rounded-full border-2 border-emerald-200 animate-ping" />
-              </div>
-              <h3 className="text-xl font-medium mb-2">Analysis Complete</h3>
-              <p className="text-secondary">
-                Your document has been successfully analysed
-              </p>
-            </div>
-
-            {/* Results summary */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <Hash className="w-5 h-5 text-indigo-500 mr-2" />
-                  <h4 className="font-medium">Token Analysis</h4>
-                </div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-secondary">Token Count:</span>
-                  <span className="font-bold">{analysisResult.tokenCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Lexical Density:</span>
-                  <span className="font-bold">
-                    {analysisResult.lexicalDensity?.toFixed(2)}%
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <BookOpen className="w-5 h-5 text-emerald-500 mr-2" />
-                  <h4 className="font-medium">Readability</h4>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Readability Score:</span>
-                  <span className="font-bold">
-                    {analysisResult.readability?.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <Brain className="w-5 h-5 text-violet-500 mr-2" />
-                  <h4 className="font-medium">Embedding</h4>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Status:</span>
-                  <span className="font-bold">Complete</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Dimensions:</span>
-                  <span className="font-bold">
-                    {analysisResult.embedding?.dimensions || 768}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Similar Documents Section */}
-            <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">
-                Similar Documents on Blockchain
-              </h3>
-              {isLoadingSimilar ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-accent" />
-                  <span className="ml-2 text-secondary">
-                    Loading similar documents...
-                  </span>
-                </div>
-              ) : similarDocuments.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4">
-                  {similarDocuments.map((doc, index) => {
-                    const metadata = JSON.parse(doc.metadata);
-                    return (
-                      <div key={index} className="bg-muted/30 p-4 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{metadata.title}</h4>
-                          <span className="text-xs text-secondary">
-                            {new Date(
-                              metadata.submissionTimestamp
-                            ).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-secondary mb-2">
-                          {doc.description}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center">
-                            <Hash className="w-4 h-4 mr-1 text-accent" />
-                            <span className="text-secondary">Hash:</span>
-                            <code className="ml-1 bg-muted px-2 py-0.5 rounded">
-                              {doc.hash ? doc.hash.slice(0, 8) + '...' : 'N/A'}
-                            </code>
-                          </div>
-                          <div className="flex items-center">
-                            <Database className="w-4 h-4 mr-1 text-accent" />
-                            <span className="text-secondary">Tokens:</span>
-                            <span className="ml-1 font-medium">
-                              {metadata.tokenCount}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-secondary">
-                  No similar documents found on the blockchain.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {!isProcessing && !analysisResult && !error && (
+        {!isProcessing && !analysisResult && !error && !isLoadingSimilar && (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6">
               <Upload className="w-8 h-8 text-accent" />
