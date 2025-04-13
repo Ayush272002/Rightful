@@ -897,10 +897,10 @@ export default function DocumentProcessor({
                             </div>
                           </div>
                           <div className="flex items-center gap-4 text-sm">
-                            { doc.similarity > 0.5 && <div className="flex items-center hover:cursor-pointer">
+                            {/* { doc.similarity > 0.5 && <div className="flex items-center hover:cursor-pointer">
                               <FileChartColumnIcon className="w-4 h-4 mr-1 text-accent" />
                               <span className="text-blue-500 underline">View detailed analysis</span>
-                            </div> }
+                            </div> } */}
                             <Link
                               className="w-4 h-4 mr-1 text-accent hover:cursor-pointer"
                               onClick={() => {
