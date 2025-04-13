@@ -14,6 +14,9 @@ import { ArrowRight, Upload, FileText, BarChart3, Link2 } from 'lucide-react';
 import { Header, Footer } from '@/components/custom';
 import { useEffect, useState, useRef } from 'react';
 import ChatWindow from '../components/custom/ChatWindow';
+import { useAccount, useConnect } from 'wagmi';
+import { redirect } from 'next/navigation';
+import WalletConnect from '@/components/WalletConnect';
 
 // Constants for reusable values
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'];
@@ -25,6 +28,8 @@ export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 transition value
   const botRef = useRef<HTMLImageElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
+  const { address, isConnected } = useAccount();
+    const { connectors, connect } = useConnect();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,14 +89,14 @@ export default function Home() {
                 The AI Protecting your Intellectual Property On-Chain
               </h1>
               <p className="text-secondary text-lg mb-8 max-w-lg">
-                Rightful uses AI agents to detect document similarity and help
+                No central body should Dictate what is Yours! <br />Rightful uses AI agents to detect document similarity and help
                 you protect your intellectual property through blockchain
                 technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="gap-2">
-                  <a href="upload">Upload Document</a>
-                </Button>
+                { isConnected ? <Button size="lg" className="gap-2" onClick={() => redirect("/dashboard")}>
+                  Enter Dashboard
+                </Button> : <WalletConnect /> }
               </div>
             </div>
 
@@ -148,7 +153,7 @@ export default function Home() {
                 Check my work for plagiarism
               </Button>
               <p className="text-sm text-secondary mt-2 text-center">
-                Analyze your document for originality and overlap.
+                Analyse your document for originality and overlap.
               </p>
             </div>
           </div>
