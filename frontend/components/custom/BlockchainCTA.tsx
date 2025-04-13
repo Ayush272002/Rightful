@@ -65,15 +65,17 @@ export function BlockchainCTA({
         <Popover>
           <PopoverTrigger asChild>
             <Button className="gap-2">
-              Secure on Blockchain
+              Learn More
               <ChevronRight className="w-4 h-4" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[400px] p-6" align="end">
             <div className="space-y-4">
-              <h4 className="font-semibold text-lg">
-                Premium Blockchain Features
-              </h4>
+              <h4 className="font-semibold">RTFL Features</h4>
+              <p className="text-sm text-muted-foreground">
+                RTFL is a protocol for secure document storage and verification
+                on the blockchain.
+              </p>
               {/* Benefits grid displaying blockchain advantages */}
               <div className="grid gap-4">
                 {BLOCKCHAIN_BENEFITS.map((benefit, index) => {

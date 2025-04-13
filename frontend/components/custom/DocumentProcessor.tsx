@@ -892,8 +892,14 @@ export default function DocumentProcessor({
                                 Want to protect your document and get detailed
                                 insights?
                               </p>
-                              <Button variant="outline" className="w-full mt-2">
-                                Add Your Document to Blockchain
+                              <Button
+                                variant="outline"
+                                className="w-full mt-2"
+                                onClick={() => {
+                                  // Handle blockchain addition here
+                                }}
+                              >
+                                Add to Blockchain
                               </Button>
                             </div>
                           </div>
