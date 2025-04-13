@@ -20,7 +20,6 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { Header } from '@/components/custom';
-import { DocumentProcessor } from '@/components/custom';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import Agent from '@/components/custom/Agent';
@@ -449,7 +448,7 @@ export default function Dashboard() {
                   onClick={scrollToUpload}
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  Register my work
+                  Log my work on the blockchain
                 </Button>
 
                 <Button
@@ -458,7 +457,7 @@ export default function Dashboard() {
                   onClick={() => router.push('/uploads')}
                 >
                   <FileText className="w-4 h-4 mr-2" />
-                  Check my work for plagiarism
+                  Find similar content to my work
                 </Button>
 
                 <Button
@@ -479,38 +478,6 @@ export default function Dashboard() {
                   Ask me something else
                 </Button>
               </div>
-            </div>
-          </div>
-
-          {/* MOVED: Upload Document now at top where activity chart was */}
-          <div id="upload-section" className="card p-6 mt-6">
-            <div
-              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors flex flex-col items-center justify-center ${
-                isDragging ? 'border-accent bg-accent/5' : 'border-border'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                <Upload className="w-8 h-8 text-accent" />
-              </div>
-              <h3 className="text-xl font-medium mb-3">
-                Upload Document for Analysis
-              </h3>
-              <p className="text-secondary mb-8 max-w-md">
-                Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')}) or
-                click to browse. We&apos;ll analyse it for similarity with
-                existing documents on the blockchain.
-              </p>
-
-              <p className="text-secondary mb-8 max-w-md text-xs left-align">
-                Only upload non-private, non-sensitive content you have the
-                right to use
-              </p>
-              <Button size="lg" className="gap-2" onClick={handleFileSelect}>
-                Choose File
-              </Button>
             </div>
           </div>
         </div>
@@ -884,40 +851,6 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-
-        {/* Document Processor Modal */}
-        {showProcessor && uploadedFile && (
-          <DocumentProcessor
-            onClose={handleProcessorClose}
-            onComplete={handleProcessorComplete}
-            file={uploadedFile}
-          />
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-md z-50 border-l-4 border-red-500">
-            <div className="flex items-start gap-3">
-              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <AlertCircle className="w-4 h-4 text-red-500" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-red-700">
-                  Upload Failed
-                </p>
-                <p className="text-xs text-secondary mt-1">{error}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={closeError}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
       </main>
 
       {/* AI Assistant*/}
