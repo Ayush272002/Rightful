@@ -139,10 +139,10 @@ export default function Home() {
             <div className="card flex flex-col items-center justify-center p-6">
               <Link2 className="w-8 h-8 text-accent mb-4" />
               <Button size="lg" variant="outline">
-                Link to Google Docs
+                Be Notified of Potential Infringements
               </Button>
               <p className="text-sm text-secondary mt-2 text-center">
-                Connect your Google Docs for seamless integration.
+                Get notified when your content is used without permission.
               </p>
             </div>
             <div className="card flex flex-col items-center justify-center p-6">
