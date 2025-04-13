@@ -245,7 +245,9 @@ const AgentCard = ({
 };
 
 const similarityColourCalculator = (similarity: number) => {
-  let r, g, b = 0;
+  let r = 0;
+  let g = 0;
+  const b = 0;
   const sim = similarity;
 
   if (sim < 0.5) {
@@ -259,7 +261,7 @@ const similarityColourCalculator = (similarity: number) => {
   }
 
   return `rgb(${Math.floor(r / 1.5)}, ${Math.floor(g / 1.5)}, ${Math.floor(b / 1.5)})`;
-}
+};
 
 interface DocumentProcessorProps {
   onClose: () => void;
@@ -823,20 +825,46 @@ export default function DocumentProcessor({
                   {similarDocuments.map((doc, index) => {
                     const metadata = JSON.parse(doc.metadata);
                     return (
-                      <div key={index} className="bg-muted/30 p-4 rounded-lg border-2">
+                      <div
+                        key={index}
+                        className="bg-muted/30 p-4 rounded-lg border-2"
+                      >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex gap-2">
-                            <div className="text-white p-1 rounded-sm text-sm" style={{
-                              backgroundColor: similarityColourCalculator(doc.similarity),
-                            }}>{Math.round(doc.similarity * 100)}%</div>
-                            <h4 className="font-medium">{metadata.title}
-                              {
-                                (process.env.NEXT_PUBLIC_TRUSTED_VERIFIER == metadata.submitterAddress)
-                                ?
-                                <><BadgeCheckIcon className="inline text-green-600 ml-2" /><span className="text-sm ml-1 text-green-600">Trusted Verifier ({metadata.submitterAddress.slice(0, 8) + '...'})</span></>
-                                :
-                                <><BadgeHelpIcon className="inline text-purple-500 ml-2" /><span className="text-sm ml-1 text-purple-500">Untrusted Verifier ({metadata.submitterAddress.slice(0, 8) + '...'})</span></>
-                              }
+                            <div
+                              className="text-white p-1 rounded-sm text-sm"
+                              style={{
+                                backgroundColor: similarityColourCalculator(
+                                  doc.similarity
+                                ),
+                              }}
+                            >
+                              {Math.round(doc.similarity * 100)}%
+                            </div>
+                            <h4 className="font-medium">
+                              {metadata.title}
+                              {process.env.NEXT_PUBLIC_TRUSTED_VERIFIER ==
+                              metadata.submitterAddress ? (
+                                <>
+                                  <BadgeCheckIcon className="inline text-green-600 ml-2" />
+                                  <span className="text-sm ml-1 text-green-600">
+                                    Trusted Verifier (
+                                    {metadata.submitterAddress.slice(0, 8) +
+                                      '...'}
+                                    )
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <BadgeHelpIcon className="inline text-purple-500 ml-2" />
+                                  <span className="text-sm ml-1 text-purple-500">
+                                    Untrusted Verifier (
+                                    {metadata.submitterAddress.slice(0, 8) +
+                                      '...'}
+                                    )
+                                  </span>
+                                </>
+                              )}
                             </h4>
                           </div>
                           <span className="text-xs text-secondary">
@@ -854,7 +882,9 @@ export default function DocumentProcessor({
                               <Hash className="w-4 h-4 mr-1 text-accent" />
                               <span className="text-secondary">Hash:</span>
                               <code className="ml-1 bg-muted px-2 py-0.5 rounded">
-                                {doc.hash ? doc.hash.slice(0, 8) + '...' : 'N/A'}
+                                {doc.hash
+                                  ? doc.hash.slice(0, 8) + '...'
+                                  : 'N/A'}
                               </code>
                             </div>
                             <div className="flex items-center">
@@ -866,7 +896,12 @@ export default function DocumentProcessor({
                             </div>
                           </div>
                           <div>
-                            <Link className="w-4 h-4 mr-1 text-accent hover:cursor-pointer" onClick={() => { redirect(doc.content) }} />
+                            <Link
+                              className="w-4 h-4 mr-1 text-accent hover:cursor-pointer"
+                              onClick={() => {
+                                redirect(doc.content);
+                              }}
+                            />
                           </div>
                         </div>
                       </div>
