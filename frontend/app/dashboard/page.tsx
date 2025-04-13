@@ -20,10 +20,13 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { Header } from '@/components/custom';
+import { DocumentProcessor } from '@/components/custom';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import Agent from '@/components/custom/Agent';
 import { useRouter } from 'next/navigation';
+import { getDocumentHashes } from '@/utils/getDocumentHashes';
+import { getDocumentsByHash } from '@/utils/getDocument';
 
 // Core configuration
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'] as const;
@@ -54,7 +57,32 @@ export default function Dashboard() {
       setIsLoading(true);
 
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      // await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      let realDocumentsData = [];
+      const docHashes = await getDocumentHashes();
+      for (const hash of docHashes) {
+        const docsByHash = await getDocumentsByHash(hash);
+        let i = 0;
+        for (const doc of docsByHash) {
+          realDocumentsData.push({
+            id: doc.documentHash + '-' + (i - 1),
+            title: doc.title,
+            description: doc.description,
+            dateAdded: doc.submissionTimestamp.toLocaleString(),
+            url: doc.resourceLocation,
+          });
+          i += 1;
+          // {
+          //   id: 'doc-1',
+          //   title: 'Research Paper on AI Ethics',
+          //   description:
+          //     'An exploration of ethical considerations in artificial intelligence development and deployment.',
+          //   dateAdded: '2025-03-15T10:30:00Z',
+          //   url: 'https://blockchain.example.com/doc/1234567',
+          // }
+        }
+      }
 
       // Mock API response with global stats and document list
       const mockApiResponse = {
@@ -111,49 +139,11 @@ export default function Dashboard() {
           ],
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         },
-        documents: [
-          {
-            id: 'doc-1',
-            title: 'Research Paper on AI Ethics',
-            description:
-              'An exploration of ethical considerations in artificial intelligence development and deployment.',
-            dateAdded: '2025-03-15T10:30:00Z',
-            url: 'https://blockchain.example.com/doc/1234567',
-          },
-          {
-            id: 'doc-2',
-            title: 'Novel: The Digital Horizon',
-            description:
-              'A science fiction story set in a world where digital and physical realities have merged.',
-            dateAdded: '2025-03-10T14:22:00Z',
-            url: 'https://blockchain.example.com/doc/7654321',
-          },
-          {
-            id: 'doc-3',
-            title: 'Blockchain Technology Whitepaper',
-            description:
-              'Technical overview of a new blockchain protocol for intellectual property tracking.',
-            dateAdded: '2025-02-28T09:15:00Z',
-            url: 'https://blockchain.example.com/doc/9876543',
-          },
-          {
-            id: 'doc-4',
-            title: 'Neural Networks: A Primer',
-            description:
-              'Introduction to the fundamentals of neural networks and their applications in modern AI systems.',
-            dateAdded: '2025-03-05T16:42:00Z',
-            url: 'https://blockchain.example.com/doc/2468013',
-          },
-          {
-            id: 'doc-5',
-            title: 'Cryptocurrency Market Analysis',
-            description:
-              'In-depth analysis of cryptocurrency trends and market predictions for the next decade.',
-            dateAdded: '2025-03-01T11:20:00Z',
-            url: 'https://blockchain.example.com/doc/1357924',
-          },
-        ],
+        documents: realDocumentsData,
       };
+
+      mockApiResponse.globalStats.totalRegistered =
+        mockApiResponse.documents.length;
 
       // Update state with "fetched" data
       setDashboardStats(mockApiResponse);
@@ -173,7 +163,7 @@ export default function Dashboard() {
       setIsLoadingDetails(true);
 
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Mock API response with document-specific stats
       const mockDocumentResponse = {

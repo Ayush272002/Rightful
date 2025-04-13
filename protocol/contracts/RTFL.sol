@@ -62,4 +62,10 @@ contract RTFL {
         return documentMap[_documentHash][_index];
     }
 
+    function getNumberOfEntries(
+        string memory _documentHash
+    ) public view returns (uint256 number) {
+        return documentMap[_documentHash].length;
+    } 
+
 }
