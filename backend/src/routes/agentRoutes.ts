@@ -16,6 +16,7 @@ import {
   SAFETY_AGENT_INSTRUCTIONS,
   PLATFORM_GUIDE_AGENT_INSTRUCTIONS,
   DOCUMENT_CLASSIFIER_INSTRUCTIONS,
+  DOCUMENT_DESCRIPTION_GENERATOR_INSTRUCTIONS,
 } from "../utils/agentInstructions";
 
 const router = Router();
@@ -126,6 +127,40 @@ router.post(
 
       if (!response) {
         res.status(500).json({ error: "Failed to classify document" });
+        return;
+      }
+
+      const parsedResponse = parseJsonResponse(response);
+      res.json(parsedResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Document description generator endpoint
+router.post(
+  "/generate-document-description",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { text } = req.body as DocumentRequest;
+
+      if (!text) {
+        res.status(400).json({ error: "Document text is required" });
+        return;
+      }
+
+      const response = await generateTextWithContext(
+        DOCUMENT_DESCRIPTION_GENERATOR_INSTRUCTIONS,
+        JSON.stringify({
+          document_text: text,
+        })
+      );
+
+      if (!response) {
+        res
+          .status(500)
+          .json({ error: "Failed to generate document description" });
         return;
       }
 
