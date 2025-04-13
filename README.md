@@ -2,6 +2,38 @@
 
 **Rightful** detects document similarity and helps you protect your intellectual property, with advanced AI and blockchain technology.
 
+## :link: Deployment / Self-running a node
+
+Anyone can self-host a Rightful verifier node.
+
+### Live Preview (Deployment)
+
+You can view a live deployment preview of our application at [https://rightful.vercel.app/](https://rightful.vercel.app/).
+
+### Requirements
+
+- NodeJS `node` >= v22.11.0
+- Node Package Manager `npm` >= 11.0.0
+
+You can install the NodeJS bundled with NPM from the the [NodeJS downloads page](https://nodejs.org/en/download).
+
+### Installation
+
+To deploy the applcation, begin by cloning the GitHub repository locally.
+```
+git clone https://github.com/Ayush272002/Rightful.git
+```
+
+Then, you'll need to set up an ETH wallet and top it up with enough to pay for the gas fees to deploy two contracts. Deploy the two contracts in `protocol/contracts`, using a tool such as [Remix](https://remix.ethereum.org/) to deploy the contracts. Save the two contract addresses - you will need them later.
+
+Open two terminal sessions, and `cd frontend` in one of them, and `cd backend` in another. Copy both of the `template.env` files to `.env` files (both the frontend and backend should have their own `.env` files), and fill in the values.
+
+Install the npm dependencies in each folder using `npm i` - this should create a `node_modules` folder with the required dependencies.
+
+Then, you can start the frontend and the backend individually, by running `npm run dev` in their respective folders to start them in developer mode, or you can build and serve the frontend with `npm run build` and `npm start`.
+
+Your frontend and backend servers should be live, and your node is ready to be used by users!
+
 ## :globe_with_meridians: RTFL Protocol
 
 Over the course of the hackathon, we spent countless hours discussing, designing and implementing the **RTFL Protocol** - our own in-house protocol that we've deployed on the blockchain, that facilitates for both users and self-hosted verifier nodes to work together to search for similar documents.
