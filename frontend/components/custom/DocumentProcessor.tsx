@@ -22,6 +22,7 @@ import {
   Link,
   BadgeCheckIcon,
   BadgeHelpIcon,
+  FileChartColumnIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -847,7 +848,7 @@ export default function DocumentProcessor({
                               metadata.submitterAddress ? (
                                 <>
                                   <BadgeCheckIcon className="inline text-green-600 ml-2" />
-                                  <span className="text-sm ml-1 text-green-600">
+                                  <span className="text-sm ml-1 text-green-600" title={metadata.submitterAddress}>
                                     Trusted Verifier (
                                     {metadata.submitterAddress.slice(0, 8) +
                                       '...'}
@@ -857,7 +858,7 @@ export default function DocumentProcessor({
                               ) : (
                                 <>
                                   <BadgeHelpIcon className="inline text-purple-500 ml-2" />
-                                  <span className="text-sm ml-1 text-purple-500">
+                                  <span className="text-sm ml-1 text-purple-500" title={metadata.submitterAddress}>
                                     Untrusted Verifier (
                                     {metadata.submitterAddress.slice(0, 8) +
                                       '...'}
@@ -881,7 +882,7 @@ export default function DocumentProcessor({
                             <div className="flex items-center">
                               <Hash className="w-4 h-4 mr-1 text-accent" />
                               <span className="text-secondary">Hash:</span>
-                              <code className="ml-1 bg-muted px-2 py-0.5 rounded">
+                              <code className="ml-1 bg-muted px-2 py-0.5 rounded" title={doc.hash}>
                                 {doc.hash
                                   ? doc.hash.slice(0, 8) + '...'
                                   : 'N/A'}
@@ -895,7 +896,11 @@ export default function DocumentProcessor({
                               </span>
                             </div>
                           </div>
-                          <div>
+                          <div className="flex items-center gap-4 text-sm">
+                            { doc.similarity > 0.5 && <div className="flex items-center hover:cursor-pointer">
+                              <FileChartColumnIcon className="w-4 h-4 mr-1 text-accent" />
+                              <span className="text-blue-500 underline">View detailed analysis</span>
+                            </div> }
                             <Link
                               className="w-4 h-4 mr-1 text-accent hover:cursor-pointer"
                               onClick={() => {
