@@ -21,6 +21,9 @@ import {
   Hash,
   FileText,
   ArrowLeft,
+  BadgeCheckIcon,
+  BadgeHelpIcon,
+  FileChartColumnIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +41,8 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import PaymentABI from '../../ABI/Payment.json';
 import { useAccount } from 'wagmi';
+import { redirect } from 'next/navigation';
+import { getDocumentHashes } from '@/utils/getDocumentHashes';
 
 dotenv.config();
 
@@ -156,7 +161,7 @@ const AgentCard = ({
 
   return (
     <div
-      className={`flex flex-col p-4 rounded-lg border relative overflow-hidden transition-all duration-300 ${
+      className={`flex flex-col p-4 rounded-lg border relative overflow-hidden transition-all duration-300 group ${
         isActive
           ? `border-${agent.color}-500/50 bg-${agent.color}-500/5 shadow-lg shadow-${agent.color}-500/10`
           : isCompleted
@@ -214,25 +219,27 @@ const AgentCard = ({
 
       {/* Result display */}
       {isCompleted && result && (
-        <div className="mt-2 text-sm">
+        <div className="mt-2 text-sm space-y-2">
           {agent.id === 'token' && (
-            <div className="flex justify-between">
-              <span>Token Count:</span>
-              <span className="font-bold">{result.tokenCount}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Token Count:</span>
+              <span className="font-bold text-foreground">
+                {result.tokenCount}
+              </span>
             </div>
           )}
           {agent.id === 'token' && (
-            <div className="flex justify-between">
-              <span>Lexical Density:</span>
-              <span className="font-bold">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Lexical Density:</span>
+              <span className="font-bold text-foreground">
                 {result.lexicalDensity?.toFixed(2)}%
               </span>
             </div>
           )}
           {agent.id === 'readability' && (
-            <div className="flex justify-between">
-              <span>Readability Score:</span>
-              <span className="font-bold">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Readability Score:</span>
+              <span className="font-bold text-foreground">
                 {result.readability?.toFixed(1)}
               </span>
             </div>
@@ -240,19 +247,49 @@ const AgentCard = ({
         </div>
       )}
 
-      {/* Progress bar */}
+      {/* Progress bar with enhanced styling */}
       {(isActive || isCompleted) && (
-        <div className="w-full bg-muted rounded-full h-1 mt-3">
+        <div className="w-full bg-muted rounded-full h-1.5 mt-3 relative overflow-hidden">
           <div
-            className={`h-1 rounded-full transition-all duration-300 ${
+            className={`h-full rounded-full transition-all duration-300 relative ${
               isCompleted ? 'bg-emerald-500' : `bg-${agent.color}-500`
             }`}
             style={{ width: `${progress}%` }}
-          />
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          </div>
         </div>
       )}
+
+      {/* Hover tooltip for additional information */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-background/80 backdrop-blur-sm text-xs text-muted-foreground">
+          {isActive && 'Processing...'}
+          {isCompleted && 'Completed successfully'}
+          {!isActive && !isCompleted && 'Waiting to start'}
+        </div>
+      </div>
     </div>
   );
+};
+
+const similarityColourCalculator = (similarity: number) => {
+  let r = 0;
+  let g = 0;
+  const b = 0;
+  const sim = similarity;
+
+  if (sim < 0.5) {
+    // Green → Orange (0.0 to 0.5)
+    g = 255;
+    r = Math.floor(255 * (sim / 0.5)); // 0 to 255
+  } else {
+    // Orange → Red (0.5 to 1.0)
+    r = 255;
+    g = Math.floor(255 * (1 - (sim - 0.5) / 0.5)); // 255 to 0
+  }
+
+  return `rgb(${Math.floor(r / 1.5)}, ${Math.floor(g / 1.5)}, ${Math.floor(b / 1.5)})`;
 };
 
 interface DocumentProcessorProps {
@@ -321,12 +358,6 @@ export default function DocumentProcessor({
     setUploadedFile(file);
     const uploadInterval = simulateUpload();
 
-    // Show processing toast
-    const processingToast = toast.loading('Processing your document...', {
-      description: 'This may take a few moments',
-      className: 'bg-background text-foreground border-border',
-    });
-
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -359,7 +390,6 @@ export default function DocumentProcessor({
         'currentUploadData',
         JSON.stringify({
           ...finalResult,
-          fileName: file.name,
           uploadDate: new Date().toISOString(),
           onBlockchain: false,
         })
@@ -412,15 +442,12 @@ export default function DocumentProcessor({
       }
 
       // Update toast to success
-      toast.dismiss(processingToast);
     } catch (err) {
       console.error('Upload error:', err);
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to upload file';
       setError(errorMessage);
 
-      // Update toast to error
-      toast.dismiss(processingToast);
       toast.error('Upload Failed', {
         description: errorMessage,
         className: 'bg-background text-foreground border-border',
@@ -708,8 +735,9 @@ export default function DocumentProcessor({
       );
 
       try {
+        const depositAmount = ethers.parseEther(GOTO_DEPOSIT || '0');
         const tx = await contract.increaseDeposit({
-          value: ethers.parseEther(GOTO_DEPOSIT!),
+          value: depositAmount,
         });
         await tx.wait();
       } catch (error: any) {
@@ -734,7 +762,6 @@ export default function DocumentProcessor({
       formData.append('url', url);
       formData.append('description', description);
       formData.append('publicKey', address!);
-      formData.append('fileName', title.toLowerCase().replace(/\s+/g, '-'));
 
       if (analysisResult?.documentHash) {
         formData.append('documentHash', analysisResult.documentHash);
@@ -777,9 +804,10 @@ export default function DocumentProcessor({
         return;
       }
 
-      // Generate a short ID for the upload
-      const shortId = Math.random().toString(36).substring(2, 8);
-      const uploadKey = `upload_${shortId}`;
+      // ID for localStorage to track the upload
+      const uploadId =
+        response.data.documentHash + '-' + response.data.documentHashIndex;
+      const uploadKey = `upload_${uploadId}`;
 
       // Store the upload data in localStorage
       localStorage.setItem(
@@ -787,10 +815,7 @@ export default function DocumentProcessor({
         JSON.stringify({
           documentHash: response.data.documentHash,
           documentHashIndex: response.data.documentHashIndex,
-          timestamp: new Date().toISOString(),
-          title,
-          url,
-          description,
+          frontier: (await getDocumentHashes()).length - 1,
         })
       );
 
@@ -970,12 +995,12 @@ export default function DocumentProcessor({
                   <Link className="w-8 h-8 text-accent" />
                   <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
                 </div>
-                <h3 className="text-xl font-medium mb-2">
+                <h3 className="heading-medium mb-2">
                   {similarDocuments.length > 0
                     ? 'Similar Documents Found'
                     : 'No Similar Documents Found'}
                 </h3>
-                <p className="text-secondary mb-6">
+                <p className="text-secondary text-lg mb-6">
                   {similarDocuments.length > 0
                     ? `We found ${similarDocuments.length} similar documents on the blockchain`
                     : 'Your document appears to be unique on the blockchain'}
@@ -987,40 +1012,94 @@ export default function DocumentProcessor({
                   <div className="grid grid-cols-1 gap-4">
                     {similarDocuments.map((doc, index) => {
                       const metadata = JSON.parse(doc.metadata);
+                      const similarityColor = similarityColourCalculator(
+                        doc.similarity
+                      );
+
                       return (
                         <Popover key={index}>
                           <PopoverTrigger asChild>
-                            <div className="bg-muted/30 p-4 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium">
-                                  {metadata.title}
-                                </h4>
+                            <div className="card hover:bg-accent/5 transition-colors cursor-pointer shadow-sm hover:shadow-md border-border/50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex gap-2 items-center">
+                                  <div
+                                    className={`inline-flex items-center font-medium rounded-full px-2.5 py-0.5 text-xs shadow-sm ${
+                                      doc.similarity >= 0.8
+                                        ? 'bg-destructive/20 text-destructive'
+                                        : doc.similarity >= 0.5
+                                          ? 'bg-amber-100/80 text-amber-800'
+                                          : 'bg-success/20 text-success'
+                                    }`}
+                                  >
+                                    {Math.round(doc.similarity * 100)}%
+                                  </div>
+                                  <h4 className="font-medium">
+                                    {metadata.title}
+                                    {process.env
+                                      .NEXT_PUBLIC_TRUSTED_VERIFIER ===
+                                    metadata.submitterAddress ? (
+                                      <>
+                                        <BadgeCheckIcon className="inline text-emerald-500 ml-2" />
+                                        <span
+                                          className="text-sm ml-1 text-emerald-500"
+                                          title={metadata.submitterAddress}
+                                        >
+                                          Trusted Verifier (
+                                          {metadata.submitterAddress.slice(
+                                            0,
+                                            8
+                                          )}
+                                          ...)
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <BadgeHelpIcon className="inline text-purple-500 ml-2" />
+                                        <span
+                                          className="text-sm ml-1 text-purple-500"
+                                          title={metadata.submitterAddress}
+                                        >
+                                          Untrusted Verifier (
+                                          {metadata.submitterAddress.slice(
+                                            0,
+                                            8
+                                          )}
+                                          ...)
+                                        </span>
+                                      </>
+                                    )}
+                                  </h4>
+                                </div>
                                 <span className="text-xs text-secondary">
                                   {new Date(
                                     metadata.submissionTimestamp
-                                  ).toLocaleDateString()}
+                                  ).toLocaleString()}
                                 </span>
                               </div>
-                              <p className="text-sm text-secondary mb-2">
-                                {doc.description}
+                              <p className="text-sm text-secondary mb-3">
+                                {metadata.description.slice(0, 150)}...
                               </p>
                               <div className="flex items-center gap-4 text-sm">
                                 <div className="flex items-center">
                                   <Hash className="w-4 h-4 mr-1 text-accent" />
                                   <span className="text-secondary">Hash:</span>
-                                  <code className="ml-1 bg-muted px-2 py-0.5 rounded">
+                                  <code
+                                    className="ml-1 bg-muted/80 px-2 py-0.5 rounded font-mono shadow-sm"
+                                    title={doc.hash}
+                                  >
                                     {doc.hash
                                       ? doc.hash.slice(0, 8) + '...'
                                       : 'N/A'}
                                   </code>
+                                  <BadgeCheckIcon className="w-4 h-4 ml-1 text-emerald-500" />
                                 </div>
                                 <div className="flex items-center">
                                   <Link className="w-4 h-4 mr-1 text-accent" />
                                   <span className="text-secondary">
                                     Tokens:
                                   </span>
-                                  <span className="ml-1 font-medium">
-                                    {metadata.tokenCount}
+                                  <span className="ml-1 font-medium tabular-nums">
+                                    {metadata.tokenCount.toLocaleString()}
                                   </span>
                                 </div>
                               </div>
@@ -1046,10 +1125,10 @@ export default function DocumentProcessor({
                                   <div
                                     className={`h-full rounded-full transition-colors ${
                                       doc.similarity >= 0.8
-                                        ? 'bg-red-600'
+                                        ? 'bg-destructive'
                                         : doc.similarity >= 0.5
                                           ? 'bg-amber-500'
-                                          : 'bg-emerald-600'
+                                          : 'bg-success'
                                     }`}
                                     style={{
                                       width: `${doc.similarity * 100}%`,
@@ -1059,10 +1138,10 @@ export default function DocumentProcessor({
                                 <p
                                   className={`text-sm font-medium ${
                                     doc.similarity >= 0.8
-                                      ? 'text-red-600'
+                                      ? 'text-destructive'
                                       : doc.similarity >= 0.5
                                         ? 'text-amber-600'
-                                        : 'text-emerald-600'
+                                        : 'text-success'
                                   }`}
                                 >
                                   {(doc.similarity * 100).toFixed(1)}% similar

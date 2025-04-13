@@ -54,5 +54,9 @@ export async function storeDocument(data: {
     data.documentHash
   );
 
-  return (await contract.getNumberOfEntries(data.documentHash)) - 1;
+  return (
+    parseInt(
+      (await contract.getNumberOfEntries(data.documentHash)).toString()
+    ) - 1
+  );
 }

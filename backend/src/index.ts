@@ -46,7 +46,6 @@ app.post("/broadcast", upload.single("file"), async (req, res) => {
       description,
       url,
       publicKey,
-      fileName,
       documentHash,
       vector,
       tokenCount,

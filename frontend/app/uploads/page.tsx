@@ -10,7 +10,7 @@ import { Header } from '@/components/custom';
 import { UserUploads } from '@/components/custom/UserUploads';
 import { DocumentProcessor } from '@/components/custom';
 import { Button } from '@/components/ui/button';
-import { Upload, ArrowLeft, X, FileText, Search } from 'lucide-react';
+import { Upload, ArrowLeft, X, FileText, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Toaster, toast } from 'sonner';
 
@@ -143,19 +143,25 @@ export default function UploadsPage() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
+              onClick={handleFileSelect}
             >
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6 relative">
                 <Upload className="w-8 h-8 text-accent" />
+                <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
               </div>
-              <h3 className="text-xl font-medium mb-3">
+              <h3 className="heading-medium mb-2">
                 Upload Document for Analysis
               </h3>
-              <p className="text-secondary mb-8 max-w-md mx-auto">
+              <p className="text-secondary text-lg mb-8 max-w-md mx-auto">
                 Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')}) or
                 click to browse. We&apos;ll analyse it for similarity with
                 existing documents on the blockchain.
               </p>
-              <Button size="lg" className="gap-2" onClick={handleFileSelect}>
+              <Button
+                size="lg"
+                className="gap-2 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <Upload className="w-4 h-4" />
                 Choose File
               </Button>
             </div>

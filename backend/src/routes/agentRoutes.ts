@@ -18,6 +18,18 @@ import {
   DOCUMENT_CLASSIFIER_INSTRUCTIONS,
   DOCUMENT_DESCRIPTION_GENERATOR_INSTRUCTIONS,
 } from "../utils/agentInstructions";
+import { getDocument } from "../utils/getDocument";
+import { getSimilarity } from "../utils/getSimilarity";
+
+import pdf from "pdf-parse";
+import fetch from "node-fetch";
+
+async function fetchPdfText(url: string) {
+  const res = await fetch(url);
+  const buffer = await res.buffer();
+  const data = await pdf(buffer);
+  return data.text;
+}
 
 const router = Router();
 
@@ -166,6 +178,29 @@ router.post(
 
       const parsedResponse = parseJsonResponse(response);
       res.json(parsedResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  "/compare/:hash1/:ix1/:hash2/:ix2",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const documentHash1 = req.params.hash1;
+      const documentIndex1 = req.params.ix1;
+      const documentHash2 = req.params.hash2;
+      const documentIndex2 = req.params.ix2;
+
+      const doc1 = await getDocument(documentHash1, parseInt(documentIndex1));
+      const doc2 = await getDocument(documentHash2, parseInt(documentIndex2));
+
+      const doc1Text = await fetchPdfText(doc1.resourceLocation);
+      const doc2Text = await fetchPdfText(doc2.resourceLocation);
+
+      const similarityResponse = await getSimilarity(doc1Text, doc2Text);
+      res.json(similarityResponse);
     } catch (error) {
       next(error);
     }

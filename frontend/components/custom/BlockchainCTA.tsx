@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Shield, Lock, Bell, Zap, ChevronRight } from 'lucide-react';
+import { Shield, Lock, Bell, Zap, ChevronRight, Info } from 'lucide-react';
 
 // TODO: Consider adding loading state for blockchain transactions
 interface BlockchainCTAProps {
@@ -50,14 +50,16 @@ export function BlockchainCTA({
 }: BlockchainCTAProps): React.ReactNode {
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background to-transparent ${className}`}
+      className={`fixed bottom-0 left-0 right-0 p-2 sm:p-4 bg-gradient-to-t from-background to-transparent ${className}`}
     >
-      <div className="max-w-6xl mx-auto flex items-center justify-between bg-card p-4 rounded-lg border shadow-lg">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 bg-card p-4 rounded-lg border shadow-lg">
         {/* Left section with main CTA text */}
-        <div className="flex items-center gap-4">
-          <div className="hidden md:block">
-            <h4 className="font-semibold">Enhance Your Document Protection</h4>
-            <p className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="flex-1 sm:flex-none">
+            <h4 className="font-semibold text-sm sm:text-base">
+              Enhance Your Document Protection
+            </h4>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Add your document to the blockchain for advanced security features
             </p>
           </div>
@@ -66,30 +68,41 @@ export function BlockchainCTA({
         {/* Popover trigger and content */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button className="gap-2">
-              Learn More
-              <ChevronRight className="w-4 h-4" />
+            <Button className="w-full sm:w-auto gap-2">
+              <Info className="w-4 h-4 sm:hidden" />
+              <span className=" sm:inline">Learn More</span>
+              <ChevronRight className="w-4 h-4 hidden sm:block" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[400px] p-6" align="end">
+          <PopoverContent
+            className="w-[90vw] sm:w-[400px] p-4 sm:p-6"
+            align="end"
+          >
             <div className="space-y-4">
-              <h4 className="font-semibold">RTFL Features</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-base sm:text-lg">
+                RTFL Features
+              </h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 RTFL is a protocol for secure document storage and verification
                 on the blockchain.
               </p>
               {/* Benefits grid displaying blockchain advantages */}
-              <div className="grid gap-4">
+              <div className="grid gap-3 sm:gap-4">
                 {BLOCKCHAIN_BENEFITS.map((benefit, index) => {
                   const Icon = benefit.icon;
                   return (
-                    <div key={index} className="flex gap-4 items-start">
+                    <div
+                      key={index}
+                      className="flex gap-3 sm:gap-4 items-start"
+                    >
                       <div className="mt-0.5">
-                        <Icon className="w-5 h-5 text-accent" />
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                       </div>
                       <div>
-                        <h5 className="font-medium">{benefit.title}</h5>
-                        <p className="text-sm text-muted-foreground">
+                        <h5 className="font-medium text-sm sm:text-base">
+                          {benefit.title}
+                        </h5>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {benefit.description}
                         </p>
                       </div>

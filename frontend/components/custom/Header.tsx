@@ -18,10 +18,11 @@ import { useAccount } from 'wagmi';
 // Constants for navigation items (Dashboard link will be conditionally shown)
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Documentation', href: '#docs' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'How It Works', href: '/#how-it-works' }, // Changed to include root path
+  {
+    label: 'Documentation',
+    href: 'https://github.com/Ayush272002/Rightful/blob/main/README.md',
+  },
 ] as const;
 
 export function Header() {
