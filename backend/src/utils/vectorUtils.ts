@@ -54,5 +54,5 @@ export function calculateDocumentSimilarity(
   document2Vector: number[]
 ): number {
   // Calculate cosine similarity between the document vectors
-  return cosineSimilarity(document1Vector, document2Vector);
+  return Math.abs(cosineSimilarity(document1Vector, document2Vector));
 }

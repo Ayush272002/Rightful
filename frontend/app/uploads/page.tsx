@@ -10,7 +10,7 @@ import { Header } from '@/components/custom';
 import { UserUploads } from '@/components/custom/UserUploads';
 import { DocumentProcessor } from '@/components/custom';
 import { Button } from '@/components/ui/button';
-import { Upload, ArrowLeft, X, FileText, Search } from 'lucide-react';
+import { Upload, ArrowLeft, X, FileText, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Toaster, toast } from 'sonner';
 
@@ -123,49 +123,55 @@ export default function UploadsPage() {
       {isMounted && <Header />}
 
       <main className="flex-1 container py-8">
-        <div className="flex flex-col gap-6">
+        {/* <div className="flex flex-col gap-6">
           {/* Page header */}
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl font-semibold">Your Documents</h1>
-              <p className="text-secondary text-sm">
-                View and manage all your uploaded documents
-              </p>
-            </div>
-          </div>
+        {/* <div className="flex items-center gap-4 mb-4"> */}
+        {/* <div> */}
+        {/* <h1 className="text-2xl font-semibold">Your Documents</h1> */}
+        {/* <p className="text-secondary text-sm"> */}
+        {/* View and manage all your uploaded documents */}
+        {/* </p> */}
+        {/* </div> */}
+        {/* </div> */}
 
-          {/* Upload section */}
-          <div className="card p-6">
-            <div
-              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-                isDragging ? 'border-accent bg-accent/5' : 'border-border'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
+        {/* Upload section */}
+        <div className="card p-6">
+          <div
+            className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+              isDragging ? 'border-accent bg-accent/5' : 'border-border'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleFileSelect}
+          >
+            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6 relative mx-auto">
+              <Upload className="w-8 h-8 text-accent" />
+              <Sparkles className="w-4 h-4 text-accent absolute -top-1 left-1/2 -translate-x-1/2 animate-pulse" />
+            </div>
+            <h3 className="heading-medium mb-2">
+              Upload Document for Analysis
+            </h3>
+            <p className="text-secondary text-lg mb-8 max-w-md mx-auto">
+              Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')}) or
+              click to browse. We&apos;ll analyse it for similarity with
+              existing documents on the blockchain.
+            </p>
+            <Button
+              size="lg"
+              className="gap-2 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                <Upload className="w-8 h-8 text-accent" />
-              </div>
-              <h3 className="text-xl font-medium mb-3">
-                Upload Document for Analysis
-              </h3>
-              <p className="text-secondary mb-8 max-w-md mx-auto">
-                Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')}) or
-                click to browse. We&apos;ll analyse it for similarity with
-                existing documents on the blockchain.
-              </p>
-              <Button size="lg" className="gap-2" onClick={handleFileSelect}>
-                Choose File
-              </Button>
-            </div>
-          </div>
-
-          {/* Document list */}
-          <div className="card p-6">
-            <UserUploads isSidebar={false} />
+              <Upload className="w-4 h-4" />
+              Choose File
+            </Button>
           </div>
         </div>
+
+        {/* Document list */}
+        {/* <div className="card p-6"> */}
+        {/* <UserUploads isSidebar={false} /> */}
+        {/* </div> */}
+        {/* </div> */}
       </main>
 
       {/* Document Processor Modal */}

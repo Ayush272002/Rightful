@@ -39,88 +39,83 @@ interface MulterRequest extends express.Request {
   file?: Express.Multer.File;
 }
 
-app.post(
-  "/broadcast",
-  upload.single("file"),
-  async (req: MulterRequest, res) => {
-    const { title, url, description, publicKey } = req.body;
-
-    console.log(title);
-    console.log(publicKey);
-
-    const goto_deposit = await getTotalDeposit(publicKey);
-    const GOTO_DEPOSIT = process.env.GOTO_DEPOSIT;
-    if (goto_deposit < ethers.parseEther(GOTO_DEPOSIT!)) {
-      res
-        .status(400)
-        .send("Insufficient deposit. Please increase your deposit.");
-      return;
-    }
-
-    const withdrawSuccessful = await ownerWithdrawFrom(
+app.post("/broadcast", upload.single("file"), async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      url,
       publicKey,
-      ethers.parseEther(GOTO_DEPOSIT!)
-    );
-    if (!withdrawSuccessful) {
-      res.status(400).send("Failed to collect deposit.");
+      documentHash,
+      vector,
+      tokenCount,
+      lexicalDensity,
+      readability,
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !url || !publicKey || !documentHash) {
+      res.status(400).json({ error: "Missing required fields" });
       return;
     }
 
-    console.log("Processing new upload request...");
+    // Validate metrics are valid numbers
+    const tokenCountNum = parseFloat(tokenCount);
+    const lexicalDensityNum = parseFloat(lexicalDensity);
+    const readabilityNum = parseFloat(readability);
 
-    console.log("Title:", title);
-    console.log("URL:", url);
-    console.log("Description:", description);
-
-    if (!req.file) {
-      res.status(400).send("No file uploaded");
+    if (
+      isNaN(tokenCountNum) ||
+      isNaN(lexicalDensityNum) ||
+      isNaN(readabilityNum)
+    ) {
+      res.status(400).json({ error: "Invalid metrics values" });
       return;
     }
 
-    try {
-      const fileBuffer = await fs.readFile(req.file.path);
-      const fileType = req.file.mimetype;
-
-      // Delete the file immediately after reading its content
-      await fs.unlink(req.file.path);
-
-      if (!(fileType in ACCEPTABLE_FILE_TYPES)) {
-        res
-          .status(400)
-          .send("Unsupported file type. Only PDF and TXT files are accepted.");
-        return;
-      }
-
-      const analysisResult = await processDocument(fileBuffer, fileType);
-      const { documentHash } = analysisResult;
-
-      console.log(documentHash);
-      console.log(analysisResult);
-      console.log(Object.values(analysisResult.embedding).join(","));
-      await storeDocument({
-        title,
-        description,
-        resourceLocation: url,
-        documentHash,
-        tokenCount: analysisResult.tokenCount,
-        lexicalDensity: analysisResult.lexicalDensity,
-        audienceEngagement: analysisResult.readability,
-        vector: Object.values(analysisResult.embedding).join(","),
-      });
-      res.json(analysisResult);
-    } catch (error) {
-      if (req.file?.path) {
-        try {
-          await fs.unlink(req.file.path);
-        } catch (unlinkError) {
-          console.error("Failed to delete uploaded file:", unlinkError);
-        }
-      }
-      console.error("Document processing failed:", error);
-      res.status(500).send("Error processing document");
+    // Check user's deposit before processing payments
+    const GOTO_DEPOSIT = process.env.GOTO_DEPOSIT;
+    if (!GOTO_DEPOSIT) {
+      throw new Error("GOTO_DEPOSIT environment variable not set");
     }
+
+    const userDeposit = await getTotalDeposit(publicKey);
+    if (userDeposit < ethers.parseEther(GOTO_DEPOSIT)) {
+      res.status(400).json({ error: "Insufficient deposit" });
+      return;
+    }
+
+    // Store the document with actual analysis metrics
+    const documentHashIndex = await storeDocument({
+      title,
+      description,
+      resourceLocation: url,
+      documentHash,
+      tokenCount: tokenCountNum,
+      lexicalDensity: lexicalDensityNum,
+      audienceEngagement: readabilityNum,
+      vector,
+    });
+
+    // Return success response with actual values used
+    res.json({
+      success: true,
+      documentHash,
+      documentHashIndex,
+      metrics: {
+        tokenCount: tokenCountNum,
+        lexicalDensity: lexicalDensityNum,
+        readability: readabilityNum,
+      },
+    });
+  } catch (error) {
+    console.error("Error in /broadcast:", error);
+    res.status(500).json({
+      error: "Failed to process document",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
   }
-);
+});
 
 app.post("/upload", upload.single("file"), async (req: MulterRequest, res) => {
   console.log("Processing new upload request...");

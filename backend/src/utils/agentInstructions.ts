@@ -285,7 +285,6 @@ RULES:
 INPUT FORMAT:
 {
   "document_text": "Content to analyse",
-  "description_length": "Short|Medium|Long"
 }
 
 OUTPUT FORMAT:

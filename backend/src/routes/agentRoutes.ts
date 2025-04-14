@@ -16,6 +16,7 @@ import {
   SAFETY_AGENT_INSTRUCTIONS,
   PLATFORM_GUIDE_AGENT_INSTRUCTIONS,
   DOCUMENT_CLASSIFIER_INSTRUCTIONS,
+  DOCUMENT_DESCRIPTION_GENERATOR_INSTRUCTIONS,
 } from "../utils/agentInstructions";
 import { getDocument } from "../utils/getDocument";
 import { getSimilarity } from "../utils/getSimilarity";
@@ -149,6 +150,40 @@ router.post(
   }
 );
 
+// Document description generator endpoint
+router.post(
+  "/generate-document-description",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { text } = req.body as DocumentRequest;
+
+      if (!text) {
+        res.status(400).json({ error: "Document text is required" });
+        return;
+      }
+
+      const response = await generateTextWithContext(
+        DOCUMENT_DESCRIPTION_GENERATOR_INSTRUCTIONS,
+        JSON.stringify({
+          document_text: text,
+        })
+      );
+
+      if (!response) {
+        res
+          .status(500)
+          .json({ error: "Failed to generate document description" });
+        return;
+      }
+
+      const parsedResponse = parseJsonResponse(response);
+      res.json(parsedResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.post(
   "/compare/:hash1/:ix1/:hash2/:ix2",
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -170,6 +205,6 @@ router.post(
       next(error);
     }
   }
-)
+);
 
 export default router;

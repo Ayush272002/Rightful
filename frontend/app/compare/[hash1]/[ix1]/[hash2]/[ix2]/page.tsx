@@ -26,7 +26,9 @@ export interface MatchBlock {
 
 export default function ComparePage() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [similarityResponse, setSimilarityResponse] = useState<MatchBlock[]>([]);
+  const [similarityResponse, setSimilarityResponse] = useState<MatchBlock[]>(
+    []
+  );
 
   const params = useParams();
   const documentHash1 = params.hash1 as string;
@@ -41,7 +43,9 @@ export default function ComparePage() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/api/agents/compare/${documentHash1}/${documentIx1}/${documentHash2}/${documentIx2}`);
+        const response = await axios.post(
+          `${API_BASE_URL}/api/agents/compare/${documentHash1}/${documentIx1}/${documentHash2}/${documentIx2}`
+        );
         console.log('Success:', response.data);
         setSimilarityResponse(response.data);
       } catch (error: any) {
@@ -74,19 +78,24 @@ export default function ComparePage() {
                 className="rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm bg-white dark:bg-zinc-900"
               >
                 <h2 className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
-                  Match #{index + 1} — Similarity: {(mb.averageSimilarity * 100).toFixed(2)}%
+                  Match #{index + 1} — Similarity:{' '}
+                  {(mb.averageSimilarity * 100).toFixed(2)}%
                 </h2>
 
                 <div className="grid gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Document A</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Document A
+                    </p>
                     <p className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-md text-sm text-gray-800 dark:text-gray-100">
                       {mb.blockA}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Document B</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Document B
+                    </p>
                     <p className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-md text-sm text-gray-800 dark:text-gray-100">
                       {mb.blockB}
                     </p>
@@ -101,7 +110,6 @@ export default function ComparePage() {
               </div>
             ))}
           </div>
-
         </div>
       </main>
     </div>

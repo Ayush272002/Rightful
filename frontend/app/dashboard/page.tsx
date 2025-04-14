@@ -22,9 +22,12 @@ import {
 import { Header } from '@/components/custom';
 import { DocumentProcessor } from '@/components/custom';
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import Agent from '@/components/custom/Agent';
 import { useRouter } from 'next/navigation';
+import { getDocumentHashes } from '@/utils/getDocumentHashes';
+import { getDocument, getDocumentsByHash } from '@/utils/getDocument';
 
 // Core configuration
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'] as const;
@@ -54,14 +57,37 @@ export default function Dashboard() {
     const fetchDashboardStats = async () => {
       setIsLoading(true);
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      // Get all localStorage keys that start with 'upload_'
+      const uploadKeys = Object.keys(localStorage).filter((key) =>
+        key.startsWith('upload_')
+      );
+      const realDocumentsData = [];
+
+      // Process each upload from localStorage
+      for (const key of uploadKeys) {
+        const uploadData = JSON.parse(localStorage.getItem(key) || '{}');
+        if (uploadData.documentHash) {
+          const doc = await getDocument(
+            uploadData.documentHash,
+            uploadData.documentHashIndex
+          );
+          let i = 0;
+          realDocumentsData.push({
+            id: doc.documentHash + '-' + (i - 1),
+            title: doc.title,
+            description: doc.description,
+            dateAdded: doc.submissionTimestamp.toLocaleString(),
+            url: doc.resourceLocation,
+          });
+          i += 1;
+        }
+      }
 
       // Mock API response with global stats and document list
       const mockApiResponse = {
         globalStats: {
-          totalRegistered: 17,
-          newWorks: 3,
+          totalRegistered: realDocumentsData.length,
+          newWorks: realDocumentsData.length,
           lastCheckTimestamp: Date.now() - 172800000, // 2 days ago
         },
         activityData: {
@@ -112,48 +138,7 @@ export default function Dashboard() {
           ],
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         },
-        documents: [
-          {
-            id: 'doc-1',
-            title: 'Research Paper on AI Ethics',
-            description:
-              'An exploration of ethical considerations in artificial intelligence development and deployment.',
-            dateAdded: '2025-03-15T10:30:00Z',
-            url: 'https://blockchain.example.com/doc/1234567',
-          },
-          {
-            id: 'doc-2',
-            title: 'Novel: The Digital Horizon',
-            description:
-              'A science fiction story set in a world where digital and physical realities have merged.',
-            dateAdded: '2025-03-10T14:22:00Z',
-            url: 'https://blockchain.example.com/doc/7654321',
-          },
-          {
-            id: 'doc-3',
-            title: 'Blockchain Technology Whitepaper',
-            description:
-              'Technical overview of a new blockchain protocol for intellectual property tracking.',
-            dateAdded: '2025-02-28T09:15:00Z',
-            url: 'https://blockchain.example.com/doc/9876543',
-          },
-          {
-            id: 'doc-4',
-            title: 'Neural Networks: A Primer',
-            description:
-              'Introduction to the fundamentals of neural networks and their applications in modern AI systems.',
-            dateAdded: '2025-03-05T16:42:00Z',
-            url: 'https://blockchain.example.com/doc/2468013',
-          },
-          {
-            id: 'doc-5',
-            title: 'Cryptocurrency Market Analysis',
-            description:
-              'In-depth analysis of cryptocurrency trends and market predictions for the next decade.',
-            dateAdded: '2025-03-01T11:20:00Z',
-            url: 'https://blockchain.example.com/doc/1357924',
-          },
-        ],
+        documents: realDocumentsData,
       };
 
       // Update state with "fetched" data
@@ -174,7 +159,7 @@ export default function Dashboard() {
       setIsLoadingDetails(true);
 
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Mock API response with document-specific stats
       const mockDocumentResponse = {
@@ -449,7 +434,7 @@ export default function Dashboard() {
                   onClick={scrollToUpload}
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  Register my work
+                  Log my work on the blockchain
                 </Button>
 
                 <Button
@@ -458,7 +443,7 @@ export default function Dashboard() {
                   onClick={() => router.push('/uploads')}
                 >
                   <FileText className="w-4 h-4 mr-2" />
-                  Check my work for plagiarism
+                  Find similar content to my work
                 </Button>
 
                 <Button
@@ -479,33 +464,6 @@ export default function Dashboard() {
                   Ask me something else
                 </Button>
               </div>
-            </div>
-          </div>
-
-          {/* MOVED: Upload Document now at top where activity chart was */}
-          <div id="upload-section" className="card p-6 mt-6">
-            <div
-              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors flex flex-col items-center justify-center ${
-                isDragging ? 'border-accent bg-accent/5' : 'border-border'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                <Upload className="w-8 h-8 text-accent" />
-              </div>
-              <h3 className="text-xl font-medium mb-3">
-                Upload Document for Analysis
-              </h3>
-              <p className="text-secondary mb-8 max-w-md">
-                Drag and drop your file ({SUPPORTED_FILE_TYPES.join(', ')}) or
-                click to browse. We&apos;ll analyse it for similarity with
-                existing documents on the blockchain.
-              </p>
-              <Button size="lg" className="gap-2" onClick={handleFileSelect}>
-                Choose File
-              </Button>
             </div>
           </div>
         </div>
@@ -571,7 +529,7 @@ export default function Dashboard() {
                       {doc.description}
                     </p>
                     <p className="text-xs text-muted-foreground mt-3">
-                      Added: {new Date(doc.dateAdded).toLocaleDateString()}
+                      Added: {doc.dateAdded}
                     </p>
                   </div>
                 </div>
@@ -586,10 +544,12 @@ export default function Dashboard() {
                 <p className="text-muted-foreground">
                   Please register documents to view them here
                 </p>
-                <Button className="mt-4 gap-2" onClick={handleFileSelect}>
-                  <Upload className="w-4 h-4" />
-                  Upload a document
-                </Button>
+                <Link href="/uploads">
+                  <Button className="mt-4 gap-2">
+                    <Upload className="w-4 h-4" />
+                    Upload a document
+                  </Button>
+                </Link>
               </div>
             </div>
           )}
@@ -879,40 +839,6 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-
-        {/* Document Processor Modal */}
-        {showProcessor && uploadedFile && (
-          <DocumentProcessor
-            onClose={handleProcessorClose}
-            onComplete={handleProcessorComplete}
-            file={uploadedFile}
-          />
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-md z-50 border-l-4 border-red-500">
-            <div className="flex items-start gap-3">
-              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <AlertCircle className="w-4 h-4 text-red-500" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-red-700">
-                  Upload Failed
-                </p>
-                <p className="text-xs text-secondary mt-1">{error}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={closeError}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
       </main>
 
       {/* AI Assistant*/}

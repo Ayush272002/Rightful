@@ -29,7 +29,7 @@ export default function Home() {
   const botRef = useRef<HTMLImageElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
   const { address, isConnected } = useAccount();
-    const { connectors, connect } = useConnect();
+  const { connectors, connect } = useConnect();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -89,14 +89,23 @@ export default function Home() {
                 The AI Protecting your Intellectual Property On-Chain
               </h1>
               <p className="text-secondary text-lg mb-8 max-w-lg">
-                No central body should Dictate what is Yours! <br />Rightful uses AI agents to detect document similarity and help
+                No central body should Dictate what is Yours! <br />
+                Rightful uses AI agents to detect document similarity and help
                 you protect your intellectual property through blockchain
                 technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                { isConnected ? <Button size="lg" className="gap-2" onClick={() => redirect("/dashboard")}>
-                  Enter Dashboard
-                </Button> : <WalletConnect /> }
+                {isConnected ? (
+                  <Button
+                    size="lg"
+                    className="gap-2"
+                    onClick={() => redirect('/dashboard')}
+                  >
+                    Enter Dashboard
+                  </Button>
+                ) : (
+                  <WalletConnect />
+                )}
               </div>
             </div>
 

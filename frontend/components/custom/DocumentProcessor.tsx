@@ -13,25 +13,44 @@ import {
   Loader2,
   CheckCircle2,
   Bot,
-  Database,
+  Link,
   Sparkles,
   Zap,
   Brain,
   BookOpen,
   Hash,
-  Link,
+  FileText,
+  ArrowLeft,
   BadgeCheckIcon,
   BadgeHelpIcon,
   FileChartColumnIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { BlockchainCTA } from './BlockchainCTA';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import axios from 'axios';
+import { ethers } from 'ethers';
+import PaymentABI from '../../ABI/Payment.json';
+import { useAccount } from 'wagmi';
 import { redirect } from 'next/navigation';
+import { getDocumentHashes } from '@/utils/getDocumentHashes';
 
 dotenv.config();
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const CONTRACT_ADDRESS_PAYMENT =
+  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_PAYMENT;
+const GOTO_DEPOSIT = process.env.NEXT_PUBLIC_GOTO_DEPOSIT;
 
 // Core configuration
 const SUPPORTED_FILE_TYPES = ['PDF', 'TXT'] as const;
@@ -65,20 +84,20 @@ const PROCESSING_AGENTS = [
     particles: 5,
   },
   {
+    id: 'description',
+    name: 'Description Generator',
+    icon: FileText,
+    description: 'Generating a concise description of the document content',
+    color: 'pink',
+    particles: 5,
+  },
+  {
     id: 'embedding',
     name: 'Embedding Generator',
     icon: Brain,
     description: 'Creating vector embeddings for semantic analysis',
     color: 'violet',
     particles: 6,
-  },
-  {
-    id: 'verification',
-    name: 'Verification Agent',
-    icon: Database,
-    description: 'Verifying document authenticity on the blockchain',
-    color: 'amber',
-    particles: 4,
   },
 ];
 
@@ -142,7 +161,7 @@ const AgentCard = ({
 
   return (
     <div
-      className={`flex flex-col p-4 rounded-lg border relative overflow-hidden transition-all duration-300 ${
+      className={`flex flex-col p-4 rounded-lg border relative overflow-hidden transition-all duration-300 group ${
         isActive
           ? `border-${agent.color}-500/50 bg-${agent.color}-500/5 shadow-lg shadow-${agent.color}-500/10`
           : isCompleted
@@ -198,49 +217,58 @@ const AgentCard = ({
         )}
       </div>
 
-      {/* Stage progress indicator */}
-      {isActive && (
-        <div className="w-full bg-muted/50 rounded-full h-1 overflow-hidden mb-2">
-          <div
-            className={`bg-${agent.color}-500 h-1 rounded-full transition-all duration-300`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-
       {/* Result display */}
       {isCompleted && result && (
-        <div className="mt-2 p-2 bg-muted/30 rounded text-xs font-mono">
+        <div className="mt-2 text-sm space-y-2">
           {agent.id === 'token' && (
-            <div className="flex justify-between">
-              <span>Token Count:</span>
-              <span className="font-bold">{result.tokenCount}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Token Count:</span>
+              <span className="font-bold text-foreground">
+                {result.tokenCount}
+              </span>
             </div>
           )}
           {agent.id === 'token' && (
-            <div className="flex justify-between">
-              <span>Lexical Density:</span>
-              <span className="font-bold">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Lexical Density:</span>
+              <span className="font-bold text-foreground">
                 {result.lexicalDensity?.toFixed(2)}%
               </span>
             </div>
           )}
           {agent.id === 'readability' && (
-            <div className="flex justify-between">
-              <span>Readability Score:</span>
-              <span className="font-bold">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Readability Score:</span>
+              <span className="font-bold text-foreground">
                 {result.readability?.toFixed(1)}
               </span>
             </div>
           )}
-          {agent.id === 'embedding' && (
-            <div className="flex justify-between">
-              <span>Embedding Generated:</span>
-              <span className="font-bold">✓</span>
-            </div>
-          )}
         </div>
       )}
+
+      {/* Progress bar with enhanced styling */}
+      {(isActive || isCompleted) && (
+        <div className="w-full bg-muted rounded-full h-1.5 mt-3 relative overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-300 relative ${
+              isCompleted ? 'bg-emerald-500' : `bg-${agent.color}-500`
+            }`}
+            style={{ width: `${progress}%` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          </div>
+        </div>
+      )}
+
+      {/* Hover tooltip for additional information */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-background/80 backdrop-blur-sm text-xs text-muted-foreground">
+          {isActive && 'Processing...'}
+          {isCompleted && 'Completed successfully'}
+          {!isActive && !isCompleted && 'Waiting to start'}
+        </div>
+      </div>
     </div>
   );
 };
@@ -289,6 +317,35 @@ export default function DocumentProcessor({
   const [agentResults, setAgentResults] = useState<Record<string, any>>({});
   const [similarDocuments, setSimilarDocuments] = useState<any[]>([]);
   const [isLoadingSimilar, setIsLoadingSimilar] = useState<boolean>(false);
+  const [showBlockchainStage, setShowBlockchainStage] = useState(false);
+  const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { address, isConnected } = useAccount();
+
+  // Load data from localStorage when component mounts
+  useEffect(() => {
+    const currentData = localStorage.getItem('currentUploadData');
+    if (currentData) {
+      const data = JSON.parse(currentData);
+      if (data.description) {
+        setDescription(data.description);
+      }
+    }
+  }, []);
+
+  // Function to update onBlockchain status in localStorage
+  const updateBlockchainStatus = (documentHash: string) => {
+    const currentData = localStorage.getItem('currentUploadData');
+    if (currentData) {
+      const data = JSON.parse(currentData);
+      if (data.documentHash === documentHash) {
+        data.onBlockchain = true;
+        localStorage.setItem('currentUploadData', JSON.stringify(data));
+      }
+    }
+  };
 
   // Function declaration (hoisted) instead of useCallback
   async function handleFileUpload(file: File) {
@@ -300,12 +357,6 @@ export default function DocumentProcessor({
     setIsProcessing(true);
     setUploadedFile(file);
     const uploadInterval = simulateUpload();
-
-    // Show processing toast
-    const processingToast = toast.loading('Processing your document...', {
-      description: 'This may take a few moments',
-      className: 'bg-background text-foreground border-border',
-    });
 
     try {
       const formData = new FormData();
@@ -339,17 +390,24 @@ export default function DocumentProcessor({
         'currentUploadData',
         JSON.stringify({
           ...finalResult,
-          fileName: file.name,
           uploadDate: new Date().toISOString(),
+          onBlockchain: false,
         })
       );
 
       setAnalysisResult(finalResult);
 
-      // Fetch similar documents from backend
+      // Clean up intervals and finish processing stage
+      cleanupAgents();
+      setIsProcessing(false);
+
+      // Start similar documents search stage
       setIsLoadingSimilar(true);
       try {
-        const vector = Object.values(finalResult.embedding).join(',');
+        console.log('Embedding data:', finalResult.embedding);
+        const vector = Object.values(finalResult.embedding || {}).join(',');
+        console.log('Vector for similarity search:', vector);
+
         const similarResponse = await fetch(
           `${BACKEND_URL}/similar-documents?vector=${vector}`
         );
@@ -359,7 +417,13 @@ export default function DocumentProcessor({
         }
 
         const similarDocs = await similarResponse.json();
+        console.log('Similar documents received:', similarDocs);
         setSimilarDocuments(similarDocs);
+        console.log(
+          'Similar documents state set:',
+          similarDocs.length,
+          'items'
+        );
       } catch (err) {
         console.error('Error fetching similar documents:', err);
         toast.error('Unable to fetch similar documents', {
@@ -369,6 +433,7 @@ export default function DocumentProcessor({
         });
       } finally {
         setIsLoadingSimilar(false);
+        console.log('isLoadingSimilar set to false');
       }
 
       // Call onComplete callback if provided
@@ -377,25 +442,18 @@ export default function DocumentProcessor({
       }
 
       // Update toast to success
-      toast.dismiss(processingToast);
-
-      // Clean up intervals
-      cleanupAgents();
     } catch (err) {
       console.error('Upload error:', err);
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to upload file';
       setError(errorMessage);
 
-      // Update toast to error
-      toast.dismiss(processingToast);
       toast.error('Upload Failed', {
         description: errorMessage,
         className: 'bg-background text-foreground border-border',
       });
     } finally {
       clearInterval(uploadInterval);
-      setIsProcessing(false);
     }
   }
 
@@ -553,7 +611,13 @@ export default function DocumentProcessor({
 
   const simulateAgentProcessing = (result: any) => {
     // Start with upload agent
-    const agents = ['token', 'readability', 'embedding', 'verification'];
+    const agents = [
+      'token',
+      'readability',
+      'description',
+      'embedding',
+      'verification',
+    ];
     const intervals: Record<string, NodeJS.Timeout> = {};
 
     // Randomly activate agents with delays
@@ -586,6 +650,14 @@ export default function DocumentProcessor({
                   ...prev,
                   readability: {
                     readability: result?.readability || 0,
+                  },
+                }));
+              } else if (agentId === 'description') {
+                setAgentResults((prev) => ({
+                  ...prev,
+                  description: {
+                    description:
+                      result?.description || 'No description available',
                   },
                 }));
               } else if (agentId === 'embedding') {
@@ -644,13 +716,154 @@ export default function DocumentProcessor({
     input.click();
   };
 
+  const handleBlockchainSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS_PAYMENT!,
+        PaymentABI,
+        signer
+      );
+
+      try {
+        const depositAmount = ethers.parseEther(GOTO_DEPOSIT || '0');
+        const tx = await contract.increaseDeposit({
+          value: depositAmount,
+        });
+        await tx.wait();
+      } catch (error: any) {
+        // Handle MetaMask transaction rejection
+        if (
+          error.code === 4001 ||
+          error.message?.includes('denied transaction signature')
+        ) {
+          toast.error('Transaction Rejected', {
+            description:
+              'You have rejected the transaction. Please try again if you want to proceed.',
+            className: 'bg-background text-foreground border-border',
+          });
+          setIsLoading(false);
+          return;
+        }
+        throw error; // Re-throw other errors
+      }
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('url', url);
+      formData.append('description', description);
+      formData.append('publicKey', address!);
+
+      if (analysisResult?.documentHash) {
+        formData.append('documentHash', analysisResult.documentHash);
+      }
+
+      // Add vector data if available
+      if (analysisResult?.embedding) {
+        const vector = Object.values(analysisResult.embedding).join(',');
+        formData.append('vector', vector);
+      }
+
+      // Add analysis metrics
+      if (analysisResult) {
+        formData.append(
+          'tokenCount',
+          analysisResult.tokenCount?.toString() || '0'
+        );
+        formData.append(
+          'lexicalDensity',
+          analysisResult.lexicalDensity?.toString() || '0'
+        );
+        formData.append(
+          'readability',
+          analysisResult.readability?.toString() || '0'
+        );
+      }
+
+      const response = await axios.post(`${BACKEND_URL}/broadcast`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Check for error in response
+      if (response.data.error) {
+        toast.error(response.data.error, {
+          description: response.data.message || 'An error occurred',
+          className: 'bg-background text-foreground border-border',
+        });
+        return;
+      }
+
+      // ID for localStorage to track the upload
+      const uploadId =
+        response.data.documentHash + '-' + response.data.documentHashIndex;
+      const uploadKey = `upload_${uploadId}`;
+
+      // Store the upload data in localStorage
+      localStorage.setItem(
+        uploadKey,
+        JSON.stringify({
+          documentHash: response.data.documentHash,
+          documentHashIndex: response.data.documentHashIndex,
+          frontier: (await getDocumentHashes()).length - 1,
+        })
+      );
+
+      toast.success('Document added to blockchain successfully', {
+        description: 'Your document has been securely stored on the blockchain',
+        className: 'bg-background text-foreground border-border',
+      });
+      setShowBlockchainStage(false);
+    } catch (error: any) {
+      console.error('Error:', error);
+
+      // Handle axios error response
+      if (error.response?.data) {
+        const { error: errorMessage, message, details } = error.response.data;
+        toast.error(errorMessage || 'Failed to add document to blockchain', {
+          description: message || 'Please try again later',
+          className: 'bg-background text-foreground border-border',
+        });
+      } else {
+        toast.error('Failed to add document to blockchain', {
+          description: error.message || 'Please try again later',
+          className: 'bg-background text-foreground border-border',
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isMounted) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="card p-8 w-full h-full max-w-6xl mx-4 relative flex flex-col">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-0">
+      {(() => {
+        console.log('Main render state:', {
+          isMounted,
+          isProcessing,
+          hasError: !!error,
+          hasAnalysisResult: !!analysisResult,
+          uploadProgress,
+          isLoadingSimilar,
+          similarDocumentsCount: similarDocuments.length,
+        });
+        return null;
+      })()}
+      <div className="card w-full h-full max-w-full p-8 relative flex flex-col overflow-hidden">
         <Button
           variant="ghost"
           size="icon"
@@ -660,6 +873,7 @@ export default function DocumentProcessor({
           <X className="w-4 h-4" />
         </Button>
 
+        {/* Stage 1: Initial Processing */}
         {isProcessing && (
           <div className="flex flex-col h-full">
             <div className="text-center mb-8">
@@ -722,6 +936,317 @@ export default function DocumentProcessor({
           </div>
         )}
 
+        {/* Stage 2: Searching Similar Documents */}
+        {!isProcessing && isLoadingSimilar && (
+          <div className="flex flex-col h-full">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
+                <Link className="w-8 h-8 text-accent animate-float" />
+                <div
+                  className="absolute inset-0 rounded-full border-2 border-accent/20 border-t-accent animate-spin"
+                  style={{ animationDuration: '2s' }}
+                />
+                <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
+              </div>
+              <h3 className="text-xl font-medium mb-2">
+                Searching Similar Documents
+              </h3>
+              <p className="text-secondary mb-6">
+                Comparing your document with others on the blockchain
+              </p>
+            </div>
+
+            {/* Skeleton loading state */}
+            <div className="flex-1 overflow-auto">
+              <div className="grid grid-cols-1 gap-4">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="bg-muted/30 p-4 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Skeleton className="h-6 w-[200px]" />
+                      <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-[80%] mb-4" />
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center">
+                        <Hash className="w-4 h-4 mr-1 text-accent/50" />
+                        <Skeleton className="h-4 w-[120px]" />
+                      </div>
+                      <div className="flex items-center">
+                        <Link className="w-4 h-4 mr-1 text-accent/50" />
+                        <Skeleton className="h-4 w-[80px]" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Stage 3: Similar Documents Results */}
+        {!isProcessing &&
+          !isLoadingSimilar &&
+          analysisResult &&
+          !showBlockchainStage && (
+            <div className="flex flex-col h-full">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 relative">
+                  <Link className="w-8 h-8 text-accent" />
+                  <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1 animate-pulse" />
+                </div>
+                <h3 className="heading-medium mb-2">
+                  {similarDocuments.length > 0
+                    ? 'Similar Documents Found'
+                    : 'No Similar Documents Found'}
+                </h3>
+                <p className="text-secondary text-lg mb-6">
+                  {similarDocuments.length > 0
+                    ? `We found ${similarDocuments.length} similar documents on the blockchain`
+                    : 'Your document appears to be unique on the blockchain'}
+                </p>
+              </div>
+
+              {similarDocuments.length > 0 && (
+                <div className="flex-1 overflow-auto">
+                  <div className="grid grid-cols-1 gap-4">
+                    {similarDocuments.map((doc, index) => {
+                      const metadata = JSON.parse(doc.metadata);
+                      const similarityColor = similarityColourCalculator(
+                        doc.similarity
+                      );
+
+                      return (
+                        <Popover key={index}>
+                          <PopoverTrigger asChild>
+                            <div className="card hover:bg-accent/5 transition-colors cursor-pointer shadow-sm hover:shadow-md border-border/50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex gap-2 items-center">
+                                  <div
+                                    className={`inline-flex items-center font-medium rounded-full px-2.5 py-0.5 text-xs shadow-sm ${
+                                      doc.similarity >= 0.8
+                                        ? 'bg-destructive/20 text-destructive'
+                                        : doc.similarity >= 0.5
+                                          ? 'bg-amber-100/80 text-amber-800'
+                                          : 'bg-success/20 text-success'
+                                    }`}
+                                  >
+                                    {Math.round(doc.similarity * 100)}%
+                                  </div>
+                                  <h4 className="font-medium">
+                                    {metadata.title}
+                                    {process.env
+                                      .NEXT_PUBLIC_TRUSTED_VERIFIER ===
+                                    metadata.submitterAddress ? (
+                                      <>
+                                        <BadgeCheckIcon className="inline text-emerald-500 ml-2" />
+                                        <span
+                                          className="text-sm ml-1 text-emerald-500"
+                                          title={metadata.submitterAddress}
+                                        >
+                                          Trusted Verifier (
+                                          {metadata.submitterAddress.slice(
+                                            0,
+                                            8
+                                          )}
+                                          ...)
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <BadgeHelpIcon className="inline text-purple-500 ml-2" />
+                                        <span
+                                          className="text-sm ml-1 text-purple-500"
+                                          title={metadata.submitterAddress}
+                                        >
+                                          Untrusted Verifier (
+                                          {metadata.submitterAddress.slice(
+                                            0,
+                                            8
+                                          )}
+                                          ...)
+                                        </span>
+                                      </>
+                                    )}
+                                  </h4>
+                                </div>
+                                <span className="text-xs text-secondary">
+                                  {new Date(
+                                    metadata.submissionTimestamp
+                                  ).toLocaleString()}
+                                </span>
+                              </div>
+                              <p className="text-sm text-secondary mb-3">
+                                {metadata.description.slice(0, 150)}...
+                              </p>
+                              <div className="flex items-center gap-4 text-sm">
+                                <div className="flex items-center">
+                                  <Hash className="w-4 h-4 mr-1 text-accent" />
+                                  <span className="text-secondary">Hash:</span>
+                                  <code
+                                    className="ml-1 bg-muted/80 px-2 py-0.5 rounded font-mono shadow-sm"
+                                    title={doc.hash}
+                                  >
+                                    {doc.hash
+                                      ? doc.hash.slice(0, 8) + '...'
+                                      : 'N/A'}
+                                  </code>
+                                  <BadgeCheckIcon className="w-4 h-4 ml-1 text-emerald-500" />
+                                </div>
+                                <div className="flex items-center">
+                                  <Link className="w-4 h-4 mr-1 text-accent" />
+                                  <span className="text-secondary">
+                                    Tokens:
+                                  </span>
+                                  <span className="ml-1 font-medium tabular-nums">
+                                    {metadata.tokenCount.toLocaleString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[400px]">
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-lg">
+                                  Document Details
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                  This document is stored securely on the
+                                  blockchain. Add your document to get detailed
+                                  similarity insights and protection features.
+                                </p>
+                              </div>
+                              <div className="space-y-2">
+                                <h5 className="font-medium">
+                                  Similarity Score
+                                </h5>
+                                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-colors ${
+                                      doc.similarity >= 0.8
+                                        ? 'bg-destructive'
+                                        : doc.similarity >= 0.5
+                                          ? 'bg-amber-500'
+                                          : 'bg-success'
+                                    }`}
+                                    style={{
+                                      width: `${doc.similarity * 100}%`,
+                                    }}
+                                  />
+                                </div>
+                                <p
+                                  className={`text-sm font-medium ${
+                                    doc.similarity >= 0.8
+                                      ? 'text-destructive'
+                                      : doc.similarity >= 0.5
+                                        ? 'text-amber-600'
+                                        : 'text-success'
+                                  }`}
+                                >
+                                  {(doc.similarity * 100).toFixed(1)}% similar
+                                </p>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <BlockchainCTA
+                className="mt-8"
+                documentHash={analysisResult.documentHash}
+                onAddToBlockchain={() => {
+                  setShowBlockchainStage(true);
+                  toast.success('Starting blockchain integration...', {
+                    description:
+                      'Your document will be securely added to the blockchain.',
+                  });
+                }}
+              />
+            </div>
+          )}
+
+        {/* Stage 4: Blockchain Upload */}
+        {!isProcessing &&
+          !isLoadingSimilar &&
+          analysisResult &&
+          showBlockchainStage && (
+            <div className="flex flex-col h-full">
+              <div className="flex items-center gap-4 mb-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowBlockchainStage(false)}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <div>
+                  <h3 className="text-xl font-medium">Add to Blockchain</h3>
+                </div>
+              </div>
+
+              <form onSubmit={handleBlockchainSubmit} className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Enter title"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="url">URL *</Label>
+                    <Input
+                      id="url"
+                      type="url"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder="https://example.com"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      readOnly
+                      className="bg-muted/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={isLoading || !title || !url}
+                  >
+                    {isLoading
+                      ? 'Adding to Blockchain...'
+                      : 'Add to Blockchain'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowBlockchainStage(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+
         {error && (
           <div className="text-center py-8">
             <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
@@ -734,195 +1259,7 @@ export default function DocumentProcessor({
           </div>
         )}
 
-        {analysisResult && !isProcessing && !error && (
-          <div className="space-y-6 flex-1 overflow-auto">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6 relative">
-                <svg
-                  className="w-8 h-8 text-emerald-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <div className="absolute inset-0 rounded-full border-2 border-emerald-200 animate-ping" />
-              </div>
-              <h3 className="text-xl font-medium mb-2">Analysis Complete</h3>
-              <p className="text-secondary">
-                Your document has been successfully analysed
-              </p>
-            </div>
-
-            {/* Results summary */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <Hash className="w-5 h-5 text-indigo-500 mr-2" />
-                  <h4 className="font-medium">Token Analysis</h4>
-                </div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-secondary">Token Count:</span>
-                  <span className="font-bold">{analysisResult.tokenCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Lexical Density:</span>
-                  <span className="font-bold">
-                    {analysisResult.lexicalDensity?.toFixed(2)}%
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <BookOpen className="w-5 h-5 text-emerald-500 mr-2" />
-                  <h4 className="font-medium">Readability</h4>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Readability Score:</span>
-                  <span className="font-bold">
-                    {analysisResult.readability?.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <Brain className="w-5 h-5 text-violet-500 mr-2" />
-                  <h4 className="font-medium">Embedding</h4>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Status:</span>
-                  <span className="font-bold">Complete</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-secondary">Dimensions:</span>
-                  <span className="font-bold">
-                    {analysisResult.embedding?.dimensions || 768}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Similar Documents Section */}
-            <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">
-                Similar Documents on Blockchain
-              </h3>
-              {isLoadingSimilar ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-accent" />
-                  <span className="ml-2 text-secondary">
-                    Loading similar documents...
-                  </span>
-                </div>
-              ) : similarDocuments.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4">
-                  {similarDocuments.map((doc, index) => {
-                    const metadata = JSON.parse(doc.metadata);
-                    return (
-                      <div
-                        key={index}
-                        className="bg-muted/30 p-4 rounded-lg border-2"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex gap-2">
-                            <div
-                              className="text-white p-1 rounded-sm text-sm"
-                              style={{
-                                backgroundColor: similarityColourCalculator(
-                                  doc.similarity
-                                ),
-                              }}
-                            >
-                              {Math.round(doc.similarity * 100)}%
-                            </div>
-                            <h4 className="font-medium">
-                              {metadata.title}
-                              {process.env.NEXT_PUBLIC_TRUSTED_VERIFIER ==
-                              metadata.submitterAddress ? (
-                                <>
-                                  <BadgeCheckIcon className="inline text-green-600 ml-2" />
-                                  <span className="text-sm ml-1 text-green-600" title={metadata.submitterAddress}>
-                                    Trusted Verifier (
-                                    {metadata.submitterAddress.slice(0, 8) +
-                                      '...'}
-                                    )
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <BadgeHelpIcon className="inline text-purple-500 ml-2" />
-                                  <span className="text-sm ml-1 text-purple-500" title={metadata.submitterAddress}>
-                                    Untrusted Verifier (
-                                    {metadata.submitterAddress.slice(0, 8) +
-                                      '...'}
-                                    )
-                                  </span>
-                                </>
-                              )}
-                            </h4>
-                          </div>
-                          <span className="text-xs text-secondary">
-                            {new Date(
-                              metadata.submissionTimestamp
-                            ).toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-secondary mb-2">
-                          {metadata.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center">
-                              <Hash className="w-4 h-4 mr-1 text-accent" />
-                              <span className="text-secondary">Hash:</span>
-                              <code className="ml-1 bg-muted px-2 py-0.5 rounded" title={doc.hash}>
-                                {doc.hash
-                                  ? doc.hash.slice(0, 8) + '...'
-                                  : 'N/A'}
-                              </code>
-                            </div>
-                            <div className="flex items-center">
-                              <Database className="w-4 h-4 mr-1 text-accent" />
-                              <span className="text-secondary">Tokens:</span>
-                              <span className="ml-1 font-medium">
-                                {metadata.tokenCount}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm">
-                            {/* { doc.similarity > 0.5 && <div className="flex items-center hover:cursor-pointer">
-                              <FileChartColumnIcon className="w-4 h-4 mr-1 text-accent" />
-                              <span className="text-blue-500 underline">View detailed analysis</span>
-                            </div> } */}
-                            <Link
-                              className="w-4 h-4 mr-1 text-accent hover:cursor-pointer"
-                              onClick={() => {
-                                redirect(doc.content);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-secondary">
-                  No similar documents found on the blockchain.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {!isProcessing && !analysisResult && !error && (
+        {!isProcessing && !analysisResult && !error && !isLoadingSimilar && (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6">
               <Upload className="w-8 h-8 text-accent" />
