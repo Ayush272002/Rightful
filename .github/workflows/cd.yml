@@ -17,43 +17,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push backend image
+      - name: Set image name
+        run: |
+            REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+            echo "IMAGE=ghcr.io/${REPO_OWNER}/${REPO_NAME}-backend:latest" >> $GITHUB_ENV
+
+      - name: Build Docker image from ./backend
         run: |
           cd backend
-          docker build -t ayush272002/rightful-backend:latest .
-          docker push ayush272002/rightful-backend:latest
+          docker build -t $IMAGE .
 
-      - name: Verify backend image by pulling
-        run: |
-          docker pull ayush272002/rightful-backend:latest
-          docker images | grep ayush272002/rightful-backend
-
-      - name: Deploy to AWS EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            sudo docker stop backend || true
-            sudo docker rm backend || true
-            sudo docker system prune -af
-            sudo docker volume prune -f
-            sudo docker pull ayush272002/rightful-backend:latest
-            sudo docker run -d \
-              --name backend \
-              -p 8000:8000 \
-              -e PORT=8000 \
-              -e INFURA_PROJECT_ID="${{ secrets.INFURA_PROJECT_ID }}" \
-              -e CONTRACT_ADDRESS="${{ secrets.CONTRACT_ADDRESS }}" \
-              -e CONTRACT_ADDRESS_PAYMENT="${{ secrets.CONTRACT_ADDRESS_PAYMENT }}" \
-              -e PRIVATE_KEY="${{ secrets.PRIVATE_KEY }}" \
-              -e GOOGLE_API_KEY="${{ secrets.GOOGLE_API_KEY }}" \
-              -e GOTO_DEPOSIT="${{ secrets.GOTO_DEPOSIT }}" \
-              ayush272002/rightful-backend:latest
+      - name: Push Docker image
+        run: docker push $IMAGE
